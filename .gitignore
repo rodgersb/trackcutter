@@ -1,0 +1,32 @@
+# Derived from source files
+*.d
+*.o
+*.a
+
+# Generated man pages
+*.1
+
+# Executables
+trackcutter
+
+# GNU Autotools generated
+configure
+aclocal.m4
+autom4te.cache
+config.guess
+config.h.in
+config.sub
+install-sh
+missing
+Makefile.in
+mkinstalldirs
+stamp-h.in
+.deps
+Makefile
+config.h
+config.log
+config.status
+stamp-h
+configure.scan
+autoscan.log
+

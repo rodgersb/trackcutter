@@ -1,0 +1,57 @@
+# Use this makefile for building under Linux if you don't want to run
+# the GNU Autoconf `./configure' script. You'll need to have the
+# libsndfile library installed on your system as a prerequisite, which
+# can be obtained from <http://www.mega-nerd.com/libsndfile/>.
+
+# List of source files
+SRC=trackcutter.c
+
+# Name of program executable
+EXEC=trackcutter
+
+# CC: Invocation name of C compiler
+# CFLAGS: Additional flags to pass to the C compiler
+# LDFLAGS: Additional flags to pass to the linker
+CC=gcc
+CFLAGS=-g -Wall $(shell pkg-config --cflags sndfile)
+LDFLAGS=$(shell pkg-config --libs sndfile)
+
+# DB: Invocation name of debugger
+# DBFLAGS: Additional flags to pass to the debugger
+DB=gdb
+DBFLAGS=
+
+# OBJ: List of object module files (derived from source file list)
+OBJ=$(SRC:.c=.o)
+
+# List of makefile target names that don't correspond to filenames
+.PHONY: all build clean debug doxygen
+
+# Default target to make if none specified
+.DEFAULT: all
+
+# Builds all derived files
+all: build
+
+# Builds the program
+build: $(EXEC)
+
+# Target for compiling source files into object module files
+$(OBJ): %.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+# Target for linking together the program executable
+$(EXEC): $(OBJ)
+	$(CC) $(LDFLAGS) -o $(EXEC) $(OBJ)
+
+# Debugs the program
+debug: $(EXEC)
+	$(DB) $(DBFLAGS) $(EXEC)
+
+# This target generates Doxygen documentation
+doxygen:
+	doxygen
+
+# This target removes all derived files
+clean:
+	rm -rf $(EXEC) $(OBJ) core doxygen
