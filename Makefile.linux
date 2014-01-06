@@ -14,7 +14,7 @@ EXEC=trackcutter
 # LDFLAGS: Additional flags to pass to the linker
 CC=gcc
 CFLAGS=-g -Wall $(shell pkg-config --cflags sndfile)
-LDFLAGS=$(shell pkg-config --libs sndfile)
+LDFLAGS=$(shell pkg-config --libs sndfile) -lm
 
 # DB: Invocation name of debugger
 # DBFLAGS: Additional flags to pass to the debugger
