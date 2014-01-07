@@ -1,0 +1,607 @@
+Layman's audio terminology overview
+===================================
+by Bryan Rodgers <rodgersb at it dot net dot au>.
+
+This is a quick primer glossary on digital audio terminology, to help you
+understand the terms involved when processing digital audio streams. It'll help
+you understand the operation of Trackcutter better, but can also be used as a
+general-purpose reference.
+
+It assumes you have an understanding of high-school-level mathematics and basic
+knowledge of audio/visual consumer equipment, computers and electronics.
+
+If you're reasonably familiar with digital audio production, editing and
+processing then you can skim briefly over this file if you wish.
+
+Quick list of terms
+-------------------
+  * Timecode
+  * Negative and Positive rails
+  * Signal amplitude
+  * Decibel
+  * Noise
+  * Dynamic Range
+  * Signal to Noise Ratio
+  * Sample / Pulse Code Modulation
+  * Sampling rate
+  * Aliasing
+  * Low-pass filter
+  * Sample depth
+  * Digital Full Scale
+  * Quantisation error
+  * Channel
+  * Frame
+  * DC-offset / High-pass filter
+  * Lossless audio format
+  * Raw audio format
+  * Lossy audio format
+
+Timecode
+--------
+
+A time index position within an audio recording, usually given as `hh:mm:ss.sss'
+(hours, minutes, seconds and fractions-of-a second). Hours and minutes are
+always given as positive integers, and can be omitted if they are zero. Seconds
+are given as a positive real number. Timecode zero (0:00:00) is the start of the
+recording.
+
+You can also specify a timecode as an absolute number of seconds (i.e. greater
+than sixty), e.g. `7200' is equivalent to `2:00:00' (two hours).
+
+
+Negative and Positive rails
+---------------------------
+
+In analogue audio signals, the voltage level varies rapidly within two bounds
+over time. With unamplified line-level outputs from most consumer-grade
+equipment, this is usually -1.414 and +1.414 volts (V) with respect to the
+ground pin of the audio connector (GND=0V). Amplified signals (i.e.
+speaker-level) usually have a much larger range.
+
+These two limits are referred to as the negative and positive rails.
+
+ Input     pos. ^
+ signal    rail |.......................
+ voltage        |      __
+                |     /  \     _
+                |    /    \   / \
+            GND +---/------\-/---\-------> time
+                |  /        v     \   _/
+                |_/                \_/
+           neg. |
+           rail |.......................
+                v
+
+Audio amplifier circuits cannot accept an input voltage level beyond these two
+rails without causing severe distortion - transistor-based solid state
+amplifiers will "clip" the outside signal to the closest rail (can be very harsh
+and unpleasant to hear), vacuum tube-based amplifiers usually introduce
+non-linear output distortion depending on tube characteristics.
+
+The ground voltage level is sometimes referred to as the zero level; a
+completely silent recording with no noise will be constantly at the zero level.
+
+
+Signal amplitude
+----------------
+
+The amplitude of an audio signal is the maximum distance between the
+highest/lowest voltage peak of the signal and the zero level.
+
+For analogue signals the amplitude can be given as a peak voltage level or a
+Root Mean Square level (RMS). Multiply the RMS figure by the square root of 2 to
+determine true peak level.
+
+
+Decibel
+-------
+
+The decibel is a relative measure of power (or amplitude) between two absolute
+power levels on a logarithmic scale, e.g.:
+
+    * -9dB corresponds to a one-eighth reduction
+    * -6dB corresponds to a one-quarter reduction
+    * -3dB corresponds to a one-half reduction
+    * 0db means same level maintained
+    * +3dB corresponds to a factor of two increase
+    * +6dB corresponds to a factor of four increase
+    * +9dB corresponds to a factor of eight increase
+
+...and so on. Positive dB quantities describe an increase in power, negative dB
+quantities describe a reduction in power. Zero decibels means power level is
+unchanged.
+
+To convert between power increase factor and decibels:
+
+    decibels = 10 * log_base_10(power_gain_factor)
+    power_gain_factor = 10 ^ (decibels / 10)
+
+Using the above formula with a scientific calculator, you might notice that
+10*log_base_10(2) is actually 3.010299957... which doesn't quite align with the
+idea that "+3dB corresponds to a  factor of two increase". What's with that?
+
+In engineering contexts it's quite common-place to just write "+3dB" as
+shorthand instead of "+3.010299957dB", for the sake of brevity, since it makes
+it easier to do mental arithmetic when adding or subtracting dB quantities.
+"+3dB" is almost always intended to mean 10*log_base_10(2) precisely when exact
+calculations need to be made.
+
+When the dB measurement is used on its own, it needs to be stated what it's made
+relative to, as it's not a complete unit of measurement in it's own right, it's
+only a ratio. For example, an amplifier with a "gain of +3dB" means the output
+signal power is double that of the input signal.
+
+If there's any letters following the "dB", then it means relative to a standard
+measure. Some audio related examples:
+
+    * dB SPL: Sound amplitude (Sound Pressure Level) relative to quietest sound
+      that the human ear can perceive (0dB SPL). 120dB SPL is typically regarded
+      as the "threshold of pain" (loudest sound that can be heard before permanent
+      injury becomes likely upon prolonged exposure).
+
+    * dBv: Voltage level relative to 1 volt. Sometimes in consumer analogue
+      audio equipment with a VU meter, the VU meter measures the input signal
+      level on this (or a similar) scale.
+
+    * dBFS: Decibel full scale: used when describing volume levels in digital
+      audio streams; see the definition below for more information.
+
+The reason for using a logarithmic scale in audio processing is because over the
+full dynamic range of human hearing, the threshold of pain is 1,000,000,000,000
+times the power of the quietest sound audible. The human ear also differentiates
+between sound pressure levels on an exponential scale.
+
+Using a logarithmic scale greatly reduces the number of significant figures
+needed when describing relative volume levels.
+
+It also simplifies the arithmetic involved when computing the total
+gain/attenuation of a series of amplifiers and voltage-dividers in an analogue
+circuit; you just add up the dB terms rather than multiply the power factors.
+
+
+Noise
+-----
+
+Generally speaking, an unwanted undesirable part of a signal.
+
+In audio production, noise is often an intractable problem.
+
+In analogue audio circuits, noise usually comes about due to:
+
+  * Imperfect filtering in the power supply; the mains AC 50Hz/60Hz hum might
+    not be fully suppressed and may come through as a ripple effect on the DC
+    power rails used to power the circuit amplifiers.
+
+    Sometimes a "ground-loop" may be present; the signal ground voltage is
+    supposed to be able to float freely to suit the receiver device, but
+    sometimes poor circuit design or RF shielding/isolation can cause the power
+    supply of the playback and receiving devices to exert influence on the
+    ground voltage. This also usually manifests as a 50Hz/60Hz hum superimposed
+    over the signal.
+
+  * Mechanical instability of certain media.
+
+    With magnetic tape players, there's often audible soft crackling, pops and
+    clicks that usually come about due to minute imperfections with the physical
+    tape alignment relative to the playback head.
+
+    Tapes also exhibit a background white noise "hiss" phenomenon; the level
+    of hiss is proportional to the size of the magnetic particles, and
+    inversely proportional to the width of the recording track. This hiss is
+    always constant in amplitude and forms the "noise floor" of the recording.
+
+    Vinyl record players usually have similar pop/click artifacts that can be
+    caused by minute imperfections or foreign particles on the surface that
+    disturb the stylus. There may also be a low-pitch soft rumbling caused by
+    the turntable motor (esp. if a direct-drive motor is used).
+
+    Some analogue magnetic tape formats use helical scanning (e.g. VHS Hi-Fi
+    audio); a rotating drum with 2 or more heads mounted, the tape transport
+    mechanism wraps the tape around the spinning drum during playback, so each
+    head reads the signal diagonally as it sweeps across the tape width. This
+    drastically increases available bandwidth from a slow-moving tape.
+
+    These formats may exhibit switching noise if the helical scanning drum
+    rotation is not properly synchronised or the tape transport is out of
+    alignment. This usually results in a buzz or hum that's proportional to the
+    drum rotation speed.
+
+    This is because the audio signal needs to be continuous, but each audio
+    pickup head will only spend a little over one-half drum revolution in
+    contact with the tape at most. Usually there's a switchover circuit that
+    alternates between the two heads, with a small overlap region to ensure
+    smooth transition, but if the switching is happening too early or too late
+    (when the currently active head goes out of tape contact, or the next head
+    is yet to regain contact), then the audio signal is briefly disrupted.
+
+  * Electromagnetic radio frequency interference (EMI/RF). If strong RF sources
+    are nearby, then this can also induce distortion on audio circuits. Can
+    manifest as hums, buzzes, crackles, chirps, hisses or cross-talk, depending
+    on the sort of signal involved.
+
+When detecting passages of silence in audio recordings, these factors all need
+to be considered; it's not reliable to merely assume that silence will be a
+perfect zero-level signal.
+
+
+Dynamic range
+-------------
+
+The dynamic range (DR) of an audio signal is the ratio of the amplitude of the
+loudest portion of the signal compared to the quietest portion (i.e. usually the
+passages of silence between songs). Given in decibels.
+
+
+Signal to Noise Ratio
+---------------------
+
+A similar measure is the Signal-to-Noise Ratio (SNR), which gives the ratio of
+the loudest signal (i.e. desirable) part of the recording to the loudest noise
+(undesirable) part of the signal. Also measured in decibels. Higher SNR means a
+clearer audio signal with less background noise.
+
+A vinyl record will typically have at most 55-70dB SNR depending on recording
+technology and quality of vinyl material used.
+
+An audio cassette will typically have around 50-56dB SNR depending on the
+manufacturing and recording process, but may have more if a noise reduction
+scheme (e.g. Dolby) is used.
+
+
+Sample / Pulse-code modulation
+------------------------------
+
+When digitising a continuous analogue signal, an electronic Analogue to Digital
+Converter (ADC) circuit (e.g. in the sound card on a computer) needs to
+repeatedly measure the instantaneous voltage level of the signal (with respect
+to the signal ground pin) at very short regular periodic time intervals and
+convert each measurement to a discrete number that approximates that voltage
+level (aka "sampling") - this constitutes a sample.
+
+ Input  ^    _       _       _      Input analogue signal
+ signal |   / \     / \     / \
+ voltage|  /   \   /   \   /   \
+        |_/     \_/     \_/
+        |
+        +-----------------------> time
+         x x x x x x x x x x x x    Samples taken at each "x" instant
+
+ Digital^                           Digitised PCM recording.
+ sample |    o       o       o      Each "o" is a discrete sample.
+ level  |  o   o   o   o   o   o
+        |o       o       o
+        |
+        +-----------------------> time
+
+Digitising an analogue signal this way is known as Pulse Code Modulation (PCM).
+
+When playing back the digital PCM recording, the original continuous analogue
+audio signal can be reconstructed through a Digital to Analogue Converter (DAC)
+circuit (e.g. in the sound card on a computer, or on the output of a portable
+digital audio player) by interpolating smoothly between the sample points.
+
+
+Sampling rate
+-------------
+
+The rate at which digital samples of an analogue audio signal are collected;
+specified in hertz (samples per second).
+
+A mathematical concept known as the Nyquist criterion states that to digitise a
+signal having limited frequency spectrum (for an audio recording this would be
+no more than 20kHz, the upper limit of human hearing), the ADC needs to collect
+samples at least twice that frequency (in this case, 40,000 samples per second),
+in order to be able to reproduce the full spectrum of the signal accurately once
+digitised.
+
+
+Aliasing
+--------
+
+When digitising an analogue audio signal, if the sampling rate is too low (as
+per the Nyquist criterion) a phenomenon known as aliasing comes into play, where
+frequencies in the input signal above the sampling rate end up "wrapping around"
+onto the lower frequency parts of the digitised signal, causing very unpleasant
+distortion artifacts.
+
+Aliasing can manifest itself as "hissing" or "ringing" artifacts that crop up
+during high-frequency sounds, such as cymbals, high-hats and snares, and the
+spoken phonetic sounds "t", "s" etc. It generally can't be recovered from, short
+of re-recording at a higher sampling rate.
+
+
+Low-pass filter
+---------------
+
+To avoid aliasing errors, the ADC circuit in a computer's sound card will have
+what's known as an anti-aliasing filter - consisting of a analogue circuit
+called a Low-Pass filter that strips out any frequency components in the input
+signal above the sampling rate.
+
+In practice, it's very difficult to build a low-pass filter in analogue
+electronics that can precisely filter off all frequencies above a given limit,
+but let through everything below unaltered.
+
+Real-world low-pass filters have what's called a "transition band"; a window in
+the frequency spectrum where components of the signal are progressively
+attenuated (reduced) towards nothing as the frequency gradually increases, but
+still allowed to pass through somewhat.
+
+The input frequency in a low-pass filter at which the output amplitude is halved
+(3dB attenuation) is called the "corner frequency".
+
+This is one of the reasons why the Compact Disc standard uses a sampling rate of
+44.1kHz and the DVD-Video (and digital TV) standards use a sampling rate of
+48kHz; even though a sampling rate of only 40kHz would normally be needed, the
+extra few kHz frequencies allow for a more generous wider transition band. Most
+CD/DVD/DTV audio recordings contain very little (if at all) frequency components
+above the 20kHz mark.
+
+
+Sample depth
+------------
+
+The sample depth refers to the number of binary bits allocated in digital
+storage for each sample - typical sample depths are normally 8 bits for
+low-quality audio sources (e.g. telephony, older computers and video games) and
+16, 20 or 24-bit for higher-quality sources (e.g. CDs, DVDs, modern video
+games).
+
+Sample levels are usually represented as an integer within a fixed range; e.g.
+8-bit samples have the range [-128, 127] (signed) or [0, 255] (unsigned) and
+16-bit samples have the range [-32768, 32767] (signed).
+
+The upper and lower bounds of the sample level refer to the negative and
+positive rails of the equivalent analogue signal respectively. Halfway between
+these two rails is the zero-level; for signed samples this is a sample value of
+0 (a digital recording containing nothing but zero-valued samples is completely
+silent).
+
+The sample depth determines the maximum dynamic range of the digital recording.
+Each extra bit of sample depth improves the max. DR by 6dB. A Compact Disc has
+16-bit sample depth and can offer a DR of up to 96dB.
+
+Sample depths above 20 bits are generally pointless in presentation-oriented
+audio formats, as this corresponds to a DR of 120dB; setting the playback volume
+to be able to hear the quietest signal level would otherwise place the loudest
+signal level beyond the threshold of pain.
+
+However in some CPU architectures, it's often more convenient to use 24 or
+32-bit sample depths as opposed to 20-bit in interim storage, since there may be
+performance penalties involved where memory accesses can often only be made on
+8, 16 or 32-bit boundaries, and using 20-bit quantities would require
+bit-shifting/masking machine code instructions to unpack the sample value on
+each reference or update.
+
+Sample levels can also be represented using IEEE 754 single/double precision
+binary floating point numbers (between -1.0 and +1.0, with 7 or 15 significant
+figures accuracy, 32/64-bits storage); this form is typically used during audio
+post-production when large amounts of layering or processing/filtering is done
+to minimise rounding error during intermediate calculations.
+
+
+Digital Full Scale
+------------------
+
+In analogue audio circuits, the positive and negative rails can sometimes be
+exceeded (i.e. overdriving) with varying consequences; sometimes the signal may
+be hard-clipped to one of the rails, or it may be allowed to briefly exceed the
+rail with some type of distortion.
+
+In pulse-code modulation (PCM), the audio signal is *strictly* confined
+to be within the positive/negative rails, because a signed <n>-bit integer
+cannot represent any value outside the range [-2^(n-1), (2^(n-1))-1].
+
+The amplitude of the loudest possible audio signal that can be accurately
+represented without clipping distortion in a digital recording is referred to as
+Digital Full Scale.
+
+The volume level of a digital signal is often represented as a decibel measure
+relative to digital full scale, written as dBFS ("decibel full-scale"). A dbFS
+quantity is *always* non-positive, since as mentioned above it's not possible to
+represent amplitudes beyond the rails.
+
+For example, in a signed 16-bit PCM recording, full scale amplitude corresponds
+to peak sample levels -32767 and 32767. A sine wave that has peak sample levels
+of -8191 and 8191 could be described as an having amplitude of -6dBFS.
+
+
+Quantisation error
+------------------
+
+For digital recordings, the sample depth must be chosen wisely.
+
+Let's say we choose a bit depth of <n>, and tweak the recording sensitivity of
+the sound card's ADC so that the loudest portion of the input analogue signal is
+at digital full scale.
+
+Any components of the signal that are quieter than amplitude <-6*n>dBFS cannot
+be represented; they will exhaust all available precision bits in the sample
+depth and be rounded off to zero-level.
+
+This is known as quantisation error (or quantisation noise).
+
+For example, in a signed 8-bit PCM recording, digital full scale amplitude
+corresponds to peak sample levels -127 and 127. The quietest signal we can
+capture would have to be no quieter than -48dBFS, and would have sample level
+peaks of -1 and 1. Any quieter signal becomes rounded off to a consistent sample
+level of 0. This lost portion of the signal is regarded as quantisation noise.
+
+
+Channel
+-------
+
+An independent isolated continuous signal in an audio stream.
+
+Monaural recordings are single-channel; the output is duplicated on each speaker
+if more than one speaker is present.
+
+Stereo recordings have two channels, one each for the left and right speakers.
+The signal coming out of each speaker can differ slightly in amplitude or delay,
+to simulate a 3-dimensional positional effect.
+
+DVDs and Blu-ray movies may have up to 6 channels (known as "5.1 surround"),
+where there are 5 full-sampling-rate channels for the positional speakers, plus
+a low-sampling-rate channel for the bass sub-woofer.
+
+
+Frame
+-----
+
+In digital audio, a frame is a collection of samples, one for each channel in
+the audio stream, that pertain to a precise particular instant of time. A
+Redbook Audio compact disc plays back at 44,100 frames per second; each frame
+has two 16-bit samples, as CDs are inherently stereo.
+
+Trackcutter optionally allows stream cutting at frame indices, which gives
+maximum indexing precision while still allowing the use of integer arithmetic.
+
+Digital audio frames should *not* be confused with video frames (a single still
+picture in a video stream); they are unrelated concepts.
+
+
+DC-offset / High-pass filter
+----------------------------
+
+A common problem in audio circuits, both analogue and digital, is when the
+ground voltage is not correctly calibrated (often due to low-cost wide tolerance
+electrical components being used), or is allowed to be influenced by
+RF interference or ground loops.
+
+You may find when digitising audio with a cheap low-end consumer sound card,
+that the sample levels may be offset from zero-level by a constant amount, which
+can reduce the amount of dynamic range that can be utilised before hard-clipping
+occurs.
+
+For example, one of the test sound cards I used for Trackcutter was an old
+Creative Soundblaster 16 from the mid-1990s. When capturing from line-in at
+16-bit sample depth, I found the sample level always hovered around +256 when
+the input source was completely quiet, effectively reducing the maximum dynamic
+range by ~0.06dB.
+
+This constant offset is known as DC-offset, and is regarded as undesirable in
+audio production, since as mentioned before, it reduces the available dynamic
+range that can be used, as one rail becomes closer than the other when
+considering the input audio signal.
+
+Prolonged exposure of DC-offset can also be bad for speakers and headphones, as
+they can overheat the magnetic coils. The presence of DC-offset also makes it
+impossible for software to calcuate the actual RMS volume of the signal as well.
+
+There are two ways to remove DC-offset from a digitised signal.
+
+Firstly you can simply subtract the offset from the sample levels, to centre
+them back around zero-level. This requires knowing the actual offset adjustment
+factor.
+
+Secondly you can run a high-pass filter through the audio, either in the
+analogue or digital domain.
+
+A high-pass filter is the counterpart to a low-pass filter (explained above), it
+attenuates or blocks frequencies below the corner frequency, while allowing
+higher frequencies to pass through unmodified.
+
+Trackcutter features an optional high-pass filter that has a corner frequency of
+20Hz; as this is the lower bound of human hearing, it should generally be
+harmless to enable the HPF to remove any DC-offset in the signal.
+
+
+Lossless audio format
+---------------------
+
+In computer audio file formats, there are various different methods of
+representing and encapsulating the digital audio data.
+
+One way is to simply store some basic meta-information about the audio stream in
+the file header (an agreed-upon data structure at the start of the file), such
+as number of channels, sampling rate, bit depth and sample format.
+
+Then following the header, the actual PCM samples are written out sequentially,
+one frame at a time, without any alteration.
+
+This is referred to as a lossless audio format (the above is a layman's
+description of the Microsoft Windows .WAV file format). Lossless audio formats
+preserve the full accuracy of the recording precisely (ideal for archiving),
+however this can come at the cost of high data storage requirements.
+
+A 16-bit stereo digital recording at 48kHz requires 192kB of storage per second,
+or 11.52MB per minute.
+
+Sometimes you can take advantage of redundancies in the audio signal (e.g. if
+only certain frequencies are used).
+
+The FLAC file format is one example that preserves full accuracy of the digital
+audio stream, but tries to reduce the storage requirements using a data
+compression algorithm specially tailored for audio signals (at the cost of
+requiring more CPU time spent during playback to decompress the stream).
+
+
+Raw audio format
+----------------
+
+Sometimes when interchanging audio streams between applications, or dealing with
+chunks of audio in intermediate stages of post-production, it may be that
+different applications cannot agree with the user on a suitable file format for
+import/export.
+
+In other cases, under a UNIX command-line environment, you may be using pipe
+operations to transfer audio data between different programs, or also wanting to
+use UNIX commands such as `cat' or `dd' to concatenate or cut up audio streams
+into segments (ideally when you already know exactly what needs to be done,
+instead of using a GUI editor program to do the cutting/splicing for you).
+
+This is where raw audio formats come into play; like lossless formats above,
+they store the PCM samples linearily without alteration. The difference is that
+there's no header containing meta-information; the sampling rate, bit depth,
+number of channels and sample format need to be told to each application that
+deals with the file.
+
+
+Lossy audio format
+------------------
+
+The counterpart to lossless audio formats are lossy audio formats.
+
+Put simply, these are audio file formats that are designed for presentation use
+(i.e. consumption by an end-user, not intended for further editing or
+modification); they are not intended as intermediate storage during
+post-production or long-term archival.
+
+Lossy audio formats use what's known as a psycho-acoustic model - a concept of
+what components of the audio signal the human ear can and can't easily perceive.
+Using this knowledge, the encoder program (that generates the lossy file) can
+strip away parts of the input audio signal to simply its mathematical
+representation.
+
+The encoder can then compress the stripped-down simplified signal much more
+efficiently than a lossless compression algorithm (such as FLAC) could do.
+
+In the case of MPEG-1 layer III (the most well-known lossy audio format, files
+usually have `.mp3' extension), you can get near FM-broadcast radio quality
+sound around 128kbps (or roughly 1MB per minute).
+
+Ogg Vorbis is another example of a lossy audio format, which has notably better
+efficiency than MPEG-1 layer III and is also patent and royalty free. I
+personally find around 96kbps (750kB/min) usually gives around FM-broadcast
+radio quality.
+
+The trade-offs in lossy audio formats are that the encoded output signal will
+*not* precisely match the input signal. It's only meant to *approximate* the
+original input signal, but in a way that most humans cannot easily tell the
+difference. Decoding lossy audio streams also requires a small amount of CPU
+overhead for the decompression algorithm.
+
+One important parameter for the encoder program is the target bitrate (or output
+quality goal); the higher the target bitrate, the more storage space used (and
+more components of the original signal are retained), and vice-versa.
+
+Setting the bitrate too low can result in too much deterioration of the audio
+signal, to where certain complex highly-detailed portions of the signal (e.g.
+sharp attack transients on percussive instruments, such as cymbals, snares and
+high-hats) can become audibly distorted.
+
+Furthermore, re-encoding a lossy audio file into another lossy audio format can
+further decrease sound quality; each lossy audio algorithm has its own different
+psycho-acoustic model and will delete differing portions of the audio signal.
+You should always encode a lossy audio stream from the lossless master copy if
+possible.
