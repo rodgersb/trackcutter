@@ -35,8 +35,8 @@ PROGRAM DOCUMENTATION (README file)
 [1] Brief introduction
 
 Trackcutter is a (presently command-line only) tool that automates the discovery
-and splicing of digitised analogue recordings containing multiple songs delimited
-by short periods of relative silence.
+and splicing of digitised analogue recordings containing multiple songs
+delimited by short periods of relative silence.
 
 It uses heuristics to reliably detect these silent passages despite the presence
 of signal artifacts endemic of analogue audio equipment, such as background
@@ -156,7 +156,8 @@ commands as appropriate.
 
 I also recommend installing a media player program like MPlayer
 <http://mplayerhq.hu/>, which can play back many audio files, so you can confirm
-that the capture was done properly, and for troubleshooting if
+that the capture was done properly, and for troubleshooting if Trackcutter is
+making mistakes (see section 4.5 and 6 for caveats).
 
 [4.1] Configure ALSA for recording
 
