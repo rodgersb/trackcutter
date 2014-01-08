@@ -165,10 +165,10 @@ making mistakes (see section 4.5 and 6 for caveats).
     two sides of 45mins each. I have a tape deck with its line-out hooked up to
     my computer sound card's line-in port.
 
-    (If you're capturing audio from a vinyl record or some other audio device,
-    simply substitute the directions involving the tape player with the
-    equivalent for that device; e.g. "press [PLAY] on tape deck" could also mean
-    "lower needle on vinyl record".)
+    (If you're capturing audio from a vinyl record or some other analogue audio
+    equipment, simply substitute the directions involving the tape player with
+    the equivalent for that device; e.g. "press [PLAY] on tape deck" could also
+    mean "lower needle on vinyl record".)
 
     Firstly, make sure that ALSA is set to capture from the line-in port. You
     can either use a GUI mixer program to do this, but I prefer the console
