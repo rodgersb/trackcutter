@@ -1,0 +1,548 @@
+ _____               _              _   _
+|_   _| __ __ _  ___| | _____ _   _| |_| |_ ___ _ __
+  | || '__/ _` |/ __| |/ / __| | | | __| __/ _ \ '__|
+  | || | | (_| | (__|   < (__| |_| | |_| ||  __/ |
+  |_||_|  \__,_|\___|_|\_\___|\__,_|\__|\__\___|_|
+
+------------------------------------------------------------------------
+Trackcutter v0.1.1
+Copyright (C) 2011-2014 Bryan Rodgers <rodgersb at it dot net dot au>
+Released to the public under GNU GPL
+<https://github.com/rodgersb/trackcutter>
+
+PROGRAM DOCUMENTATION (README file)
+------------------------------------------------------------------------
+
+*** TABLE OF CONTENTS ***
+
+[1] Brief introduction
+[2] Compiling and installing
+[3] Audio terminology overview
+[4] Using the program
+    [4.1] Configure ALSA for recording
+    [4.2] Find out the noise floor of your input media
+    [4.3] Start capturing
+    [4.4] Now the fun stuff!
+    [4.5] Fine-tuning
+[5] Other use cases for Trackcutter
+[6] Limitations and caveats
+[7] Known issues
+[8] Future planned features
+[9] License / credits / contributions / contacting the author
+
+------------------------------------------------------------------------
+
+[1] Brief introduction
+
+Trackcutter is a (presently command-line only) tool that automates the discovery
+and splicing of digitised analogue recordings containing multiple songs delimited
+by short periods of relative silence.
+
+It uses heuristics to reliably detect these silent passages despite the presence
+of signal artifacts endemic of analogue audio equipment, such as background
+hiss, DC-offset and transient clicks and pops.
+
+The envisioned use for this program was to assist with digital capture of music
+from audio cassettes and vinyl record albums, so the individual songs can be
+indexed and played back on a [portable] digital music player.
+
+You can simply capture each side of these media at a time into a large `.wav'
+file, reducing the manual intervention required as much as possible.
+
+Trackcutter will then search the recordings for intervening silence and divide
+the large `.wav' file into smaller clips that correspond to each song, so you
+can encode the individual song files into a lossy format to play on a portable
+digital music player.
+
+While you could possibly use a full-featured audio-editing program like
+Audacity, the drawbacks with that approach would mean having to learn a complex
+GUI that is built to address a myriad of needs and may be time-consuming and/or
+intimidating if you only want to cut up a captured recording. Trackcutter aims
+to be simple and straightforward in its approach.
+
+------------------------------------------------------------------------
+
+[2] Compiling and installing
+
+Trackcutter is written in ISO C99-conforming C, and is designed to work under
+any POSIX-like environment. It has been tested under Linux w/ GNU libc.
+
+Trackcutter requires:
+
+  * the libsndfile library, available at
+    <http://www.mega-nerd.com/libsndfile/>. This library provides an abstraction
+    for the huge number of digital audio file formats currently in existence
+    (such as WAV, FLAC, headerless raw audio samples and also many other
+    lossless and lossy formats), enabling Trackcutter to support these formats
+    without much effort on the developer's part.
+
+  * the GNU libc library, needed for the getopt_long() function for processing
+    long command-line options. Because there are a large number of command-line
+    options to handle different use cases, I decided having long options would
+    make using the program easier to learn.
+
+There are two ways to build the source code:
+
+a) Use the GNU Autoconf script.
+
+    If you have a POSIX-compatible operating system, type:
+
+        $ ./configure
+        $ make
+
+    Then, as root, if you want to install the program system-wide:
+
+        # make install
+
+    Usual GNU Autoconf conventions apply; i.e. you can type `./configure --help'
+    to see a list of compile-time configuration options.
+
+b) Use the manually-written makefiles.
+
+    Under Linux:
+
+        $ make -f Makefile.linux
+
+I have yet to test building Trackcutter under Microsoft Windows with the MinGW
+or Cygwin compilers. Since I no longer use Windows any more, this unfortunately
+will take a low priority. Contributions and feedback reports from other users
+are welcome.
+
+I haven't tested Trackcutter under Mac OS X either, but I anticipate it should
+work without problem, providing you have the prerequisites installed.
+
+If you've downloaded a pre-compiled binary of Trackcutter, just place it
+somewhere in your system path. There are no dependent files or hard-coded
+filesystem locations involved.
+
+Trackcutter currently can read any audio file format that libsndfile natively
+supports. It also supports reading from raw (headerless) PCM audio data files as
+a last resort, but extra command-line options must be given to describe the PCM
+sample format and structure.
+
+Note that for Trackcutter to be able to read FLAC or Ogg Vorbis files, you must
+have libsndfile compiled with libFLAC and libvorbis support enabled. You can run
+`trackcutter --help'; in the help text, Trackcutter will include a list of
+supported audio file formats.
+
+------------------------------------------------------------------------
+
+[3] Audio terminology overview
+
+If you're not familiar with audio editing and production terminology, the file
+`audio_terminology.txt' gives a brief overview of the terms that the Trackcutter
+documentation and program uses. You may want to read through that file at this
+point.
+
+Another brief yet fun introduction to digital audio is hosted by the Xiph.org
+foundation here: <http://xiph.org/video/vid1.shtml>
+
+------------------------------------------------------------------------
+
+[4] Using the program
+
+Trackcutter currently only has a command-line interface. I'm contemplating
+creating a separate GUI front-end in a future version that can give graphical
+feedback on the various tasks.
+
+This example assumes that you're running Linux, with ALSA (Advanced Linux Sound
+Architecture) configured for interfacing with your computer's audio hardware.
+Note that Trackcutter itself does not access sound devices directly - the ALSA
+commands are only included to paint the bigger picture for a use case.
+
+If you run another operating system, you'll need to read your OS's documentation
+on how to digitally capture an audio signal to a disk file, and substitute those
+commands as appropriate.
+
+I also recommend installing a media player program like MPlayer
+<http://mplayerhq.hu/>, which can play back many audio files, so you can confirm
+that the capture was done properly, and for troubleshooting if
+
+[4.1] Configure ALSA for recording
+
+    Let's say I have a compact audio cassette that I want to digitise, which has
+    two sides of 45mins each. I have a tape deck with its line-out hooked up to
+    my computer sound card's line-in port.
+
+    (If you're capturing audio from a vinyl record or some other audio device,
+    simply substitute the directions involving the tape player with the
+    equivalent for that device; e.g. "press [PLAY] on tape deck" could also mean
+    "lower needle on vinyl record".)
+
+    Firstly, make sure that ALSA is set to capture from the line-in port. You
+    can either use a GUI mixer program to do this, but I prefer the console
+    based `alsamixer' program. Type:
+
+        $ alsamixer
+
+    Move the highlight to the line-in volume level slider (press [F4] to view
+    recording-related settings only if you can't find a line-in slider).
+
+    Make sure the line-in input is not muted; press [M] to toggle mute setting
+    (there should be a green "OO" at the bottom of the slider if it's not muted,
+    or a cyan "MM" if it is). Press the up-arrow key if the recording level is
+    way too low (the green gauge will gradually rise). For most sound cards,
+    2/3rds of the way up should be appropriate. You can revisit this stage if
+    the recording level later turns out to be too high or too low.
+
+    Finally, press [SPACEBAR]. The red text "CAPTURE" should be shown below the
+    line-in slider; this means ALSA will record from line-in. Press [ESC] when
+    done to exit alsamixer and return to the terminal prompt.
+
+[4.2] Find out the noise floor of your input media
+
+    Secondly, we need to know what the noise floor level is for your source
+    media. Trackcutter expects the noise floor to be given as a negative decibel
+    quantity, relative to digital full scale (dBFS), so it knows how to
+    discriminate between music and intervening silence.
+
+    What I recommend doing is recording a 5-10 second stint of background noise,
+    by positioning the cassette in the tape player to a silent section (either
+    at the very start or very end).
+
+    Type the following command at the terminal prompt, but only press [ENTER]
+    immediately after you you press the [PLAY] button on your tape deck:
+
+        $ arecord --format=cd --file-type=wav --duration=10 silence.wav
+
+    The `--duration 10' option is the number of seconds to record for; adjust
+    the number as needed. If you have multiple sound cards in your system, you
+    may need to select the appropriate sound device with the `--device' option,
+    see the arecord(1) man page for more information on that.
+
+    Stop the tape deck once the terminal prompt reappears, and reposition the
+    tape to the start of side "A".
+
+    Note: Some commercial pre-recorded cassette tapes may have a series of short
+    increasing-pitch beeps on the lead-in before the first song (this is a cue
+    signal often used at duplication plants for marking the start/end of the
+    master recording). You'll need to advance the cassette past this point so
+    Trackcutter doesn't accidentally include it as part of the first song.
+
+    Now let's use Trackcutter to analyse the noise levels of the silence test
+    recording. Type the following command:
+
+        $ trackcutter --analyse --high-pass silence.wav
+
+    This will produce output similar to the following:
+
+        statistic               left_channel       right_channel
+           positive_peak  +0.072729767000648  +0.002614032082205
+           negative_peak  -0.002293943739325  -0.009167754394247
+               peak_dbfs  -22.76575607491384  -40.75474060092774
+                 min_rms  +0.000927738163780  +0.000928476795361
+                 max_rms  +0.020431176301150  +0.002620367617299
+                 avg_rms  +0.001066680673239  +0.001010606534889
+            min_rms_dbfs  -60.65149155472916  -60.64457891489636
+            max_rms_dbfs  -33.79413257298738  -51.63275552501676
+            avg_rms_dbfs  -59.43931147291985  -59.90835795616869
+               dc_offset  +0.000000000000000  +0.000000000000000
+          dc_offset_dbfs                -inf                -inf
+       fix_dc_offset_arg  --dc-offset=-0.000000,-0.000000
+
+    The statistic you're interested in is the "avg_rms_dbfs"; this is the
+    average sound level that was observed in the silence test recording, and
+    gives a good indicator of the noise floor of the source medium.
+
+    If the left and right channels don't match up, then just use the reading
+    that is closer to zero; in this case, -59.4dBFS. You might want to give a
+    bit of extra margin, say, add another +3dB to the noise floor. For the rest
+    of this case, we'll use -56dBFS as the noise floor for this tape example.
+
+    The `--high-pass' option here is strongly recommended to automatically
+    correct for any DC-offset that may be present in the digitised audio signal.
+    This can often happen with lower-end consumer-grade soundcards that use
+    cheaper wide-tolerance components; without high-pass filtering any DC-offset
+    in the signal will disrupt the RMS volume level calculations.
+
+    For future versions of Trackcutter, I'm considering making the `--high-pass'
+    option default to on, with an option to disable it manually. I just need to
+    ensure through extensive testing that it doesn't harm sound quality in any
+    case.
+
+[4.3] Start capturing
+
+    Type the following command, but do not press [ENTER] until you've
+    immediately hit [PLAY] on your cassette deck:
+
+        $ arecord --format=cd --file-type=wav --duration=$((45*60)) side_a.wav
+
+    This captures side "A" of the cassette, and automatically stops after 45
+    minutes (change the 45 to reflect the length of each side as needed; the
+    `--duration' option takes a number of seconds, hence the shell arithmetic
+    expression to multiply minutes by sixty).
+
+    If you don't know the durations of each side, then you can omit the
+    `--duration' option completely, but you'll need to press Ctrl-C when the
+    tape deck reaches the end-of-side to prevent ALSA's arecord from happily
+    filling up the rest of the disk.
+
+    When done, flip the cassette around to side "B" and repeat the same command:
+
+        $ arecord --format=cd --file-type=wav --duration=$((45*60)) side_b.wav
+
+[4.4] Now the fun stuff!
+
+    When Trackcutter is searching for track lengths and delimiters, there are
+    two modes of operation. You can either have it print out the time indices of
+    each track (for verification purposes, if you find you may need to tweak the
+    parameters, or if you intend to use another program to extract the audio
+    chunks yourself), or alternatively have Trackcutter do the extraction for
+    you.
+
+    Using the print-cuts-mode of Trackcutter on the captured side "A":
+
+        $ trackcutter --cut --high-pass --noise-floor=-56 side_a.wav
+
+    The `--noise-floor' option is where you specify the noise floor (in dBFS)
+    that was established in section 4.2 above.
+
+    This will produce a table similar to the following:
+
+        track_num   start_time      end_time        duration_time
+                 1   0:00:05.52297   0:02:54.62875       0:02:49.10578
+                 2   0:02:59.22587   0:11:36.71757       0:08:36.49170
+                 3   0:11:39.61410   0:18:34.12678       0:06:54.51267
+                 4   0:18:38.01732   0:22:06.83412       0:03:27.81680
+                 5   0:22:10.01072   0:28:54.39791       0:06:44.38718
+                 6   0:28:58.93770   0:37:14.18437       0:08:15.24666
+                 7   0:37:18.75163   0:41:05.34419       0:03:46.59256
+
+    In this example, there are seven songs on side "A" of the cassette.
+    Trackcutter has determined the start and end timecodes for each track plus
+    their duration. The intervening gaps between the songs are silent.
+
+    Trackcutter can also extract the individual songs  out into separate files,
+    ready to be fed to a lossy audio encoder program (if you later intend to
+    place the files on a digital music player to play them back):
+
+        $ mkdir side_a_songs
+        $ trackcutter --cut --high-pass --noise-floor=-56 \
+            --extract-dir=side_a_songs/ --verbose side_a.wav
+
+    This will extract all the tracks shown above and store them in the
+    subdirectory `side_a_songs'. Each song file will be named `<nnnnnnnn>.wav'
+    where <nnnnnnnn> is the track number, starting from 1.
+
+    The `--verbose' option is sometimes suggested so you can see what
+    Trackcutter is actually during. You'll see some diagnostic messages (that I
+    mainly use for development). If you see a message like "false positive",
+    this means that Trackcutter thought it had found the start of a new song,
+    but it turned out to be a transient click or pop artifact.
+
+    You can also have Trackcutter automatically name the files with the name of
+    each track. Create a text file, and on each line, type the name of each
+    track.
+
+    As these name will be used as a basis for filenames, they should *not*
+    contain any characters that are forbidden by your OS's file system (under
+    UNIX, forward slashes must not be used). Names should *not* contain a file
+    extension either, as one will be automatically appended by Trackcutter.
+    There should be no blank lines in the file.
+
+    You can then re-run the above `trackcutter' command with new arguments:
+
+        $ trackcutter --cut --high-pass --noise-floor=-56 \
+            --extract-dir=side_a_songs/ --verbose \
+            --track-names-file=side_a_tracknames.txt \
+            side_a.wav
+
+    The `--track-names-file' argument specifies the text file containing the
+    track names.
+
+    It should be self-evident how to repeat these commands for side "B" of the
+    cassette, if needed.
+
+[4.5] Fine-tuning
+
+    As stated in section 6 below, there are some limitations to what Trackcutter
+    can achieve automatically.
+
+    Here's a description of some basic Trackcutter options that you can
+    fine-tune if you're finding Trackcutter is misdetecting some songs or song
+    change intervals (i.e. if you end up with a file containing two or more
+    songs concatenated together).
+
+    --min-silence-period=<msec>
+
+        This is the minimum silence gap that Trackcutter will expect between
+        songs. It's given in milliseconds. The default is 2000 (two seconds),
+        which I believe is reasonable in most cases.
+
+        Sometimes you may need to increase this value if a song contains a bar
+        of silence mid-way through (i.e. transitioning between movements in a
+        longer piece), so that Trackcutter doesn't divide the song up into two
+        separate files at that point.
+
+    --min-signal-period=<msec>
+
+        This is the minimum period of non-silence (continuous signal above the
+        noise floor) that constitutes the start of a song. It's also given in
+        milliseconds.
+
+        This parameter helps Trackcutter distinguish between the actual start of
+        a song and transient analogue spike noise (such as clicks and pops).
+
+        The default is 100 milliseconds (one-tenth of a second).
+
+        If your source material has songs that start in near-silence with a
+        pulse-train of short transient percussive instruments (e.g. claves,
+        hi-hat, bass drum, heartbeat, drummer hitting their sticks together to
+        set the tempo for the other band members, some other sound effect,
+        etc.), and Trackcutter is omitting that lead-in, then reducing this
+        value can sometimes help.
+
+        Typically such a percussive intro will feature some degree of
+        reverberation (which makes detection easier), whereas transient spike
+        noise won't (since that's not acoustically generated).
+
+    --min-track-length=<msec>
+
+        This is the minimum length of time that Trackcutter will assume a song
+        runs for. Again it's given in milliseconds.
+
+        Once Trackcutter finds the start of a song, it will not resume searching
+        for silence until this period has elapsed.
+
+        The idea behind this option is allow Trackcutter to properly delimit
+        songs that feature a short vocal-only, "musique concrete" or
+        off-beat/avant-garde intro, immediately followed by a short pause, then
+        the main bars of the song begin.
+
+        A classic example that springs to mind is the "Gunter glieben glauten
+        globen" gibberish phrase at the start of Def Leppard's "Rock of Ages"
+        from their 1983 "Pyromania" album (Trivia: this was uttered by the
+        record producer Mutt Lange during one of the many takes for this song -
+        the band liked it and decided to leave it in the final album cut).
+
+        Another example is Pink Floyd's "Echoes" from their 1971 "Meddle" album,
+        which begins with a slowly-repeating submarine sonar "ping" sound,
+        before the keyboards gradually fade-in.
+
+        The default is 10,000 milliseconds (ten seconds).
+
+        If you find Trackcutter is treating the intro as a separate track to the
+        main part of the song, then try setting this value to greater than the
+        length of the intro.
+
+        The value of this setting should never exceed the duration of the
+        shortest song in the recording, otherwise it may cause Trackcutter to
+        concatenate two songs together in one file.
+
+------------------------------------------------------------------------
+
+[5] Other use cases for Trackcutter
+
+Some other possibilities for using Trackcutter:
+
+I have a number of video game titles for the Sony Playstation 2 console. I quite
+enjoy the musical soundtrack of many of these games, and wanted to be able to
+listen to the game music on my portable digital music player (n.b. this is a
+type of format shifting - in most jurisdictions under copyright law it's
+permitted as long as it's done only for private personal use and not
+redistributed, broadcast in public or used in other works).
+
+Unfortunately many of these console video game titles store the audio on the
+game disc in some obscure or encrypted format, which means it's difficult if not
+presently impossible to read it back on a computer.
+
+However most of these games usually have a "Jukebox" option in their menu where
+you can play back the songs on their own (without the game's sound effects
+overdubbed like in normal play). Even if the game lacks a "jukebox" mode, you
+could also play back the tracks by warping to a level that triggers each song
+you want, and then either pausing the game or bringing up a dialogue box (most
+games keep the music playing in the latter, and sometimes in the former). You
+can sometimes also turn down the sound effects and just let the game idle for a
+loop of the song.
+
+Trackcutter also proved very useful for this purpose; I could then instruct the
+game to play back the whole musical soundtrack, hook up an audio link cable
+running from the PS2's audio output into my computer's sound card input, and
+then capture the audio as the game played its music. Trackcutter can cut out the
+leading and trailing silence of each song recording, and also isolate the first
+play of the song in the case of per-track looping jukeboxes.
+
+------------------------------------------------------------------------
+
+[6] Limitations and caveats
+
+The one thing that Trackcutter does not, and likely will never have direct
+access to is a pair of human ears (Volunteers are advised to lend their ears and
+brains to scientific research in aural machine perception.)
+
+This means that all the heuristics featured are mathematically-defined
+best-guess attempts that should work for most recordings, but some tricky corner
+cases may cause it to produce incorrect results.
+
+You are advised to quickly listen/skim through the output files Trackcutter
+generates to make sure that the output is what you expect it to be, and be
+prepared to tweak options if Trackcutter makes a mistake.
+
+The *big* caveat is that Trackcutter cannot help you with an album where each
+song smoothly segues into the next (without any pause of silence). Trackcutter
+simply sees the recording as one big song, and won't know how to detect the
+transition. The best it can do here is trim off the leading and trailing
+silence. In this case you're better off using a sound editing program like
+Audacity to chop up the recording if you want to index the individual tracks.
+
+Well known examples of this type of album are Pink Floyd's 1973 album "Dark Side
+Of The Moon" and Jean-Michel Jarre's 1976 album "Oxygene".
+
+------------------------------------------------------------------------
+
+[7] Known issues
+
+Currently Trackcutter operates a little slower than I initially anticipated it
+to be. There is some excessive sample conversion overhead as it instructs
+libsndfile to convert each sample to-and-from IEEE 754 64-bit double precision
+(intended as a catch-all for all other sample formats).
+
+I've been profiled Trackcutter for performance bottlenecks. I'm considering in
+future possibly implementing separate routines for dealing with common sample
+formats, such as 16-bit integers. It may even be possible to use SIMD
+instruction sets (e.g. MMX/3DNow/SSE) to speed up some operations, if initial
+benchmarking tests show these optimisations to be worthwhile.
+
+------------------------------------------------------------------------
+
+[8] Future planned features
+
+See the `TODO' file for a roadmap of features I've envisioned for future
+versions of Trackcutter.
+
+If you want to contribute to Trackcutter development, you're more then welcome
+to offer code contributions under the GPL. If your proposed modifications suit
+the prescribed roadmap, I can include them in the Trackcutter baseline.
+
+As Trackcutter was initially written purely on a volunteer basis (I wanted to
+teach myself hands-on digital audio signal processing), I often have other
+priorities in my life that reduce the available time that I can work on
+Trackcutter.
+
+------------------------------------------------------------------------
+
+[9] License / credits / contacting the author
+
+Trackcutter is licensed under the GNU General Public License, version 3. The
+full license text is available in the file "COPYING", but in layman's terms:
+
+* You may freely distribute unmodified copies of Trackcutter to anyone at
+  any cost.
+* You may distribute modified binary versions of Trackcutter to anyone at
+  any cost, on the condition you make copies of the corresponding
+  modified source code available to the recipients of these modified
+  binary copies.
+* If you integrate source code from Trackcutter into your own work of
+  software, or write software that links directly with Trackcutter object
+  code, then the resulting aggregate work may only be distributed under
+  the terms of the GPL.
+
+All work on Trackcutter done by Bryan Rodgers, unless otherwise stated.
+
+I can be contacted at <rodgersb at it dot net dot au>.
+
+Suggestions, feedback or code contributions are welcome.
+
+------------------------------------------------------------------------
+
+*** END OF README ***
