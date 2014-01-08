@@ -552,7 +552,8 @@ A 16-bit stereo digital recording at 48kHz requires 192kB of storage per second,
 or 11.52MB per minute.
 
 Sometimes you can take advantage of redundancies in the audio signal (e.g. if
-only certain frequencies are used).
+only certain frequencies are used, or if two or more channels are almost
+identical).
 
 The FLAC file format is one example that preserves full accuracy of the digital
 audio stream, but tries to reduce the storage requirements using a data
@@ -604,10 +605,10 @@ In the case of MPEG-1 layer III (the most well-known lossy audio format, files
 usually have `.mp3' extension), you can get near FM-broadcast radio quality
 sound around 128kbps (or roughly 1MB per minute).
 
-Ogg Vorbis is another example of a lossy audio format, which has notably better
-efficiency than MPEG-1 layer III and is also patent and royalty free. I
-personally find around 96kbps (750kB/min) usually gives around FM-broadcast
-radio quality.
+Ogg Vorbis (extension `.ogg' or `.oga') is another example of a lossy audio
+format, which has notably better efficiency than MPEG-1 layer III and is also
+patent and royalty free. I personally find around 96kbps (750kB/min) usually
+delivers around FM-broadcast radio quality.
 
 The trade-offs in lossy audio formats are that the encoded output signal will
 *not* precisely match the input signal. It's only meant to *approximate* the
