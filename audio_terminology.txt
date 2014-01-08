@@ -22,6 +22,7 @@ Quick list of terms
   * Noise
   * Dynamic Range
   * Signal to Noise Ratio
+  * Noise Floor
   * Sample / Pulse Code Modulation
   * Sampling rate
   * Aliasing
@@ -219,6 +220,9 @@ In analogue audio circuits, noise usually comes about due to:
     manifest as hums, buzzes, crackles, chirps, hisses or cross-talk, depending
     on the sort of signal involved.
 
+  * Thermal noise. Resistors, if they become heated up during operation, can
+    also induce what's known as thermal noise into a signal. 
+
 When detecting passages of silence in audio recordings, these factors all need
 to be considered; it's not reliable to merely assume that silence will be a
 perfect zero-level signal.
@@ -246,6 +250,26 @@ technology and quality of vinyl material used.
 An audio cassette will typically have around 50-56dB SNR depending on the
 manufacturing and recording process, but may have more if a noise reduction
 scheme (e.g. Dolby) is used.
+
+
+Noise floor
+-----------
+
+Related to Signal-to-Noise Ratio, the noise floor is a measure of the typical
+amount of background noise in a audio recording.
+
+In digital audio, it's usually measured in dBFS. 
+
+Trackcutter needs to be told the noise floor of the input recording it's
+processing, so it knows how to discriminate between music and silence. It
+regards any position in the recording where the overall volume (amplitude) is
+below the noise floor as silence (with a few constraints, to allow for songs
+that have brief interjections of silence mid-song).
+
+The noise floor of audio recordings vary wildly, even on the same media type. It
+usually depends on the type/quality of equipment used for initial recording,
+mixing and mastering, how much layering of multiple audio tracks is done at the
+mixing stage, and the frequency equalisation done at the mastering stage.
 
 
 Sample / Pulse-code modulation
