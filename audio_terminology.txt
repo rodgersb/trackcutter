@@ -608,7 +608,7 @@ sound around 128kbps (or roughly 1MB per minute).
 Ogg Vorbis (extension `.ogg' or `.oga') is another example of a lossy audio
 format, which has notably better efficiency than MPEG-1 layer III and is also
 patent and royalty free. I personally find around 96kbps (750kB/min) usually
-delivers around FM-broadcast radio quality.
+delivers FM-broadcast radio quality.
 
 The trade-offs in lossy audio formats are that the encoded output signal will
 *not* precisely match the input signal. It's only meant to *approximate* the
