@@ -1,5 +1,5 @@
 /*  trackcutter: Automatically splices multi-song analogue recordings
-    Copyright (C) 2011 Bryan Rodgers <rodgersb@it.net.au>
+    Copyright (C) 2011-2014 Bryan Rodgers <rodgersb@it.net.au>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
 #include <stdarg.h>
 
 /** Program version */
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 
 /** Definition for boolean constant @e false */
 #define FALSE 0
@@ -70,7 +70,7 @@
     after this period (in seconds). */
 #define DFL_MIN_TRACK_LENGTH 10
 /** Default signal-to-noise ratio used to discriminate non-silence from silence (in dBFS) */
-#define DFL_SNR -48.0
+#define DFL_NOISE_FLOOR -48.0
 
 /** Corner frequency for high-pass filter in Hz */
 #define HIGH_PASS_CORNER_FREQ 20.0
@@ -161,7 +161,7 @@ typedef struct
     /** Signal-to-noise ratio used for determining which passages of
         audio constitute a song, versus which constitute intervening
         silence. Given in dBFS; must be negative. */
-    float snr;
+    float noise_floor_dbfs;
 
     /** Minimum length for a track; this is used to prevent tracks that
         start off with mostly rests (e.g. a lone high-hat, other
@@ -248,7 +248,7 @@ typedef struct
     sf_count_t ra_frame_cnt;
 
     double alpha;                         /**< Scaling factor in high-pass filter */
-    double n_x_snr_sq;                    /**< n(x_snr)^2 precomputed for RMS comparisons */
+    double n_x_nf_sq;                    /**< n(x_nf)^2 precomputed for RMS comparisons */
     double x_sq_ttl[MAX_CHANNELS];        /**< Current sum(x_i^2) for RMS comparisons */
     double hpf_rej[MAX_CHANNELS];         /**< Previous shunt-to-earth level for high-pass filter */
     double hpf_rej_ttl[MAX_CHANNELS];     /**< Cumulative total of reject levels, used for computing DC offset */
@@ -317,7 +317,7 @@ static const struct option longopts[] =
     { "min-silence-period", required_argument, NULL, 's' },
     { "min-signal-period", required_argument, NULL, 'n' },
     { "min-track-length", required_argument, NULL, 'l' },
-    { "snr", required_argument, NULL, 'S' },
+    { "noise-floor", required_argument, NULL, 'S' },
     { "time-range", required_argument, NULL, 't' },
     { "frame-range", required_argument, NULL, 'I' },
     { "track-range", required_argument, NULL, 'T' },
@@ -409,7 +409,7 @@ static void init_options(void)
     options.min_silence_period = DFL_MIN_SILENCE_PERIOD;
     options.min_signal_period = DFL_MIN_SIGNAL_PERIOD;
     options.min_track_length = DFL_MIN_TRACK_LENGTH;
-    options.snr = DFL_SNR;
+    options.noise_floor_dbfs = DFL_NOISE_FLOOR;
     options.end_frame_idx = SF_COUNT_MAX;
     options.track_num_end = INT_MAX;
 }
@@ -489,10 +489,10 @@ static void print_help_msg(void)
     printf("                                   Default is %d.\n", DFL_MIN_SIGNAL_PERIOD);
     printf("  -l, --min-track-length=N         Minimum length, in seconds, of each track.\n");
     printf("                                   Default is %d.\n", DFL_MIN_TRACK_LENGTH);
-    printf("  -S, --snr=N                      Signal-to-noise ratio used for discriminating\n");
-    printf("                                   actual signal from silence. Given in decibels\n");
+    printf("  -S, --noise-floor=N              Noise floor used for discriminating actual\n");
+    printf("                                   signal from silence. Given in decibels\n");
     printf("                                   full scale (dBFS), must be a negative real\n");
-    printf("                                   number. Default is %.2f.\n", DFL_SNR);
+    printf("                                   number. Default is %.2f.\n", DFL_NOISE_FLOOR);
     printf("  -T, --track-range=A-B            Signifies track numbering will start from A\n");
     printf("                                   and processing will stop at track number B.\n");
     printf("                                   Track numbers must be positive integers.\n");
@@ -639,13 +639,13 @@ static int parse_positive_int_arg(void)
     return n;
 }
 
-/** Parses current option argument as a signal-to-noise ratio quantity,
+/** Parses current option argument as a noise floor quantity,
     given in decibels full-scale (dbFS). Must be negative. Terminates
     program with an error message if an invalid argument is given
     (non-negative or non-numeric).
 
-    @returns Parsed SNR value, guaranteed to be negative. */
-static double parse_snr_arg(void)
+    @returns Parsed noise floor value, guaranteed to be negative. */
+static double parse_noise_floor_arg(void)
 {
     char *optarg_str_tail;
     double n = strtod(optarg, &optarg_str_tail);
@@ -996,7 +996,7 @@ static void parse_options(void)
                 options.min_signal_period = parse_positive_int_arg();
                 break;
             case 'S':
-                options.snr = parse_snr_arg();
+                options.noise_floor_dbfs = parse_noise_floor_arg();
                 break;
             case 't':
                 parse_time_range();
@@ -1226,7 +1226,7 @@ static void dump_options(void)
     verbose("options.cut_point_format = %s", cut_point_format_t_s[options.cut_point_format]);
     verbose("options.min_silence_period = %d", options.min_silence_period);
     verbose("options.min_signal_period = %d", options.min_signal_period);
-    verbose("options.snr = %f", options.snr);
+    verbose("options.noise_floor_dbfs = %f", options.noise_floor_dbfs);
     verbose("options.min_track_length = %d", options.min_track_length);
     verbose("options.time_range_given = %d", options.time_range_given);
     verbose("options.start_time = %f", options.start_time);
@@ -1305,7 +1305,7 @@ static const char *render_frame_idx_as_sec(char *s, sf_count_t frame_idx)
 
 /** Determines if at least one of the channels in the current frame has
     a RMS level above the SNR threshold. Uses @a state.x_sq_ttl and @a
-    state.n_x_snr_sq to make comparisons.
+    state.n_x_nf_sq to make comparisons.
     
     @return @c TRUE if at least one of the channels in current frame has
     RMS level above SNR; @c FALSE if all channels in current frame
@@ -1319,7 +1319,7 @@ static int we_have_signal(void)
     
     for(c = 0; !res && c < state.numchannels; c++)
     {
-        res = state.n_x_snr_sq < state.x_sq_ttl[c];
+        res = state.n_x_nf_sq < state.x_sq_ttl[c];
     }
     return res;
 }
@@ -2030,10 +2030,10 @@ static void init_state(void)
     
     if(options.task == TCT_CUTTING)
     {
-        double x_snr = exp2(options.snr / (20.0 * log10(2)));
-        verbose("x_snr = %lf", x_snr);
-        state.n_x_snr_sq = x_snr * x_snr * (double)state.rms_window_len;
-        verbose("n(x_snr)^2 = %lf", state.n_x_snr_sq);
+        double x_nf = exp2(options.noise_floor_dbfs / (20.0 * log10(2)));
+        verbose("x_nf = %lf", x_nf);
+        state.n_x_nf_sq = x_nf * x_nf * (double)state.rms_window_len;
+        verbose("n(x_nf)^2 = %lf", state.n_x_nf_sq);
         state.min_silence_len = state.samplerate * options.min_silence_period / 1000;
         state.min_signal_len = state.samplerate * options.min_signal_period / 1000;
         state.min_track_len = state.samplerate * options.min_track_length;
