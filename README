@@ -250,11 +250,11 @@ making mistakes (see section 4.5 and 6 for caveats).
     bit of extra margin, say, add another +3dB to the noise floor. For the rest
     of this case, we'll use -56dBFS as the noise floor for this tape example.
 
-    The `--high-pass' option here is strongly recommended to automatically
-    correct for any DC-offset that may be present in the digitised audio signal.
-    This can often happen with lower-end consumer-grade soundcards that use
-    cheaper wide-tolerance components; without high-pass filtering any DC-offset
-    in the signal will disrupt the RMS volume level calculations.
+    The `--high-pass' option here is strongly recommended. It automatically
+    corrects for any DC-offset that may be present in the digitised audio
+    signal. This can often happen with lower-end consumer-grade soundcards that
+    use cheaper wide-tolerance components; without high-pass filtering any
+    DC-offset in the signal will disrupt the RMS volume level calculations.
 
     For future versions of Trackcutter, I'm considering making the `--high-pass'
     option default to on, with an option to disable it manually. I just need to
