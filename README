@@ -372,8 +372,8 @@ making mistakes (see section 4.5 and 6 for caveats).
 
         Sometimes you may need to increase this value if a song contains a bar
         of silence mid-way through (i.e. transitioning between movements in a
-        longer piece), so that Trackcutter doesn't divide the song up into two
-        separate files at that point.
+        longer piece, or an A capella verse), so that Trackcutter doesn't divide
+        the song up into two separate files at that point.
 
     --min-signal-period=<msec>
 
@@ -397,10 +397,10 @@ making mistakes (see section 4.5 and 6 for caveats).
         reverberation (which makes detection easier), whereas transient spike
         noise won't (since that's not acoustically generated).
 
-    --min-track-length=<msec>
+    --min-track-length=<sec>
 
         This is the minimum length of time that Trackcutter will assume a song
-        runs for. Again it's given in milliseconds.
+        runs for. Unlike the other options, this one is given in seconds.
 
         Once Trackcutter finds the start of a song, it will not resume searching
         for silence until this period has elapsed.
@@ -414,7 +414,7 @@ making mistakes (see section 4.5 and 6 for caveats).
         album, which begins with a slowly-repeating submarine sonar "ping"
         sound, before the keyboards gradually fade-in.
 
-        The default is 10,000 milliseconds (ten seconds).
+        The default is ten seconds.
 
         If you find Trackcutter is treating the intro as a separate track to the
         main part of the song, then try setting this value to greater than the
