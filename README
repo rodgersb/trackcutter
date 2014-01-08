@@ -326,9 +326,9 @@ making mistakes (see section 4.5 and 6 for caveats).
     where <nnnnnnnn> is the track number, starting from 1.
 
     The `--verbose' option is sometimes suggested so you can see what
-    Trackcutter is actually during. You'll see some diagnostic messages (that I
-    mainly use for development). If you see a message like "false positive",
-    this means that Trackcutter thought it had found the start of a new song,
+    Trackcutter is actually doing. You'll see some diagnostic messages that I
+    mainly use for development. If you see a message like "false positive", this
+    just means that Trackcutter thought it had found the start of a new song,
     but it turned out to be a transient click or pop artifact.
 
     You can also have Trackcutter automatically name the files with the name of
