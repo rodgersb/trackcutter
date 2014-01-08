@@ -468,8 +468,8 @@ play of the song in the case of per-track looping jukeboxes.
 [6] Limitations and caveats
 
 The one thing that Trackcutter does not, and likely will never have direct
-access to is a pair of human ears (Volunteers are advised to lend their ears and
-brains to scientific research in aural machine perception.)
+access to is a pair of human ears. Volunteers are advised to lend their ears and
+brains to scientific research in the field of aural machine perception.
 
 This means that all the heuristics featured are mathematically-defined
 best-guess attempts that should work for most recordings, but some tricky corner
