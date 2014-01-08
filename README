@@ -492,7 +492,7 @@ to be. There is some excessive sample conversion overhead as it instructs
 libsndfile to convert each sample to-and-from IEEE 754 64-bit double precision
 (intended as a catch-all for all other sample formats).
 
-I've been profiled Trackcutter for performance bottlenecks. I'm considering in
+I've been profiling Trackcutter for performance bottlenecks. I'm considering in
 future possibly implementing separate routines for dealing with common sample
 formats, such as 16-bit integers. It may even be possible to use SIMD
 instruction sets (e.g. MMX/3DNow/SSE) to speed up some operations, if initial
