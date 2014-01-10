@@ -108,9 +108,9 @@ power levels on a logarithmic scale, e.g.:
     * +6dB corresponds to a factor of four increase
     * +9dB corresponds to a factor of eight increase
 
-...and so on. Positive dB quantities describe an increase in power, negative dB
-quantities describe a reduction in power. Zero decibels means power level is
-unchanged.
+...and so on. Positive dB quantities describe an increase in power (gain),
+negative dB quantities describe a reduction in power (attenuation). Zero
+decibels means power level is unchanged.
 
 To convert between power increase factor and decibels:
 
@@ -147,17 +147,20 @@ measure. Some audio related examples:
     * dBFS: Decibel full scale: used when describing volume levels in digital
       audio streams; see the definition below for more information.
 
-The reason for using a logarithmic scale in audio processing is because over the
-full dynamic range of human hearing, the threshold of pain is 1,000,000,000,000
-times the power of the quietest sound audible. The human ear also differentiates
-between sound pressure levels on an exponential scale.
+The reason for using a logarithmic scale to describe volume/power levels in
+audio processing is because over the entire dynamic range of human hearing, the
+threshold of pain is 1,000,000,000,000 times the power of the quietest sound
+audible.
 
 Using a logarithmic scale greatly reduces the number of significant figures
-needed when describing relative volume levels.
+needed when describing relative volume levels. (The Richter scale, used for
+measuring earthquake strength, is another example of a logarithmic scale).
 
-It also simplifies the arithmetic involved when computing the total
-gain/attenuation of a series of amplifiers and voltage-dividers in an analogue
-circuit; you just add up the dB terms rather than multiply the power factors.
+The human ear also differentiates between sound pressure levels better on an
+exponential scale, so decibels simplify the arithmetic involved when computing
+the total gain/attenuation of a series of amplifiers and voltage-dividers
+(attenuators) in an analogue audio circuit; you just add/subtract the dB terms
+rather than multiply the power factors.
 
 
 Noise
@@ -194,13 +197,13 @@ In analogue audio circuits, noise usually comes about due to:
     Vinyl record players usually have similar pop/click artifacts that can be
     caused by minute imperfections or foreign particles on the surface that
     disturb the stylus. There may also be a low-pitch soft rumbling caused by
-    the turntable motor (esp. if a direct-drive motor is used).
+    vibrations from the turntable motor (esp. if a direct-drive motor is used).
 
     Some analogue magnetic tape formats use helical scanning (e.g. VHS Hi-Fi
-    audio); a rotating drum with 2 or more heads mounted, the tape transport
-    mechanism wraps the tape around the spinning drum during playback, so each
-    head reads the signal diagonally as it sweeps across the tape width. This
-    drastically increases available bandwidth from a slow-moving tape.
+    audio); a tilted rotating drum with 2 or more heads mounted, the tape
+    transport mechanism wraps the tape around the spinning drum during playback,
+    so each head reads the signal diagonally as it sweeps across the tape width.
+    This drastically increases available bandwidth from a slow-moving tape.
 
     These formats may exhibit switching noise if the helical scanning drum
     rotation is not properly synchronised or the tape transport is out of
@@ -221,7 +224,7 @@ In analogue audio circuits, noise usually comes about due to:
     on the sort of signal involved.
 
   * Thermal noise. Resistors, if they become heated up during operation, can
-    also induce what's known as thermal noise into a signal. 
+    also induce what's known as Johnson-Nyquist thermal noise into a signal.
 
 When detecting passages of silence in audio recordings, these factors all need
 to be considered; it's not reliable to merely assume that silence will be a
@@ -258,7 +261,7 @@ Noise floor
 Related to Signal-to-Noise Ratio, the noise floor is a measure of the typical
 amount of background noise in a audio recording.
 
-In digital audio, it's usually measured in dBFS. 
+In digital audio, it's usually measured in dBFS.
 
 Trackcutter needs to be told the noise floor of the input recording it's
 processing, so it knows how to discriminate between music and silence. It
@@ -269,7 +272,7 @@ that have brief interjections of silence mid-song).
 The noise floor of audio recordings vary wildly, even on the same media type. It
 usually depends on the type/quality of equipment used for initial recording,
 mixing and mastering, how much layering of multiple audio tracks is done at the
-mixing stage, and the frequency equalisation done at the mastering stage.
+mixing stage, and the frequency equalisation curve used at the mastering stage.
 
 
 Sample / Pulse-code modulation
@@ -304,6 +307,9 @@ audio signal can be reconstructed through a Digital to Analogue Converter (DAC)
 circuit (e.g. in the sound card on a computer, or on the output of a portable
 digital audio player) by interpolating smoothly between the sample points.
 
+Pulse Code Modulation is the most widely used technique for capturing audio
+signals; it's used in the compact disc, DVD and DAT formats, for example.
+
 
 Sampling rate
 -------------
@@ -317,6 +323,13 @@ no more than 20kHz, the upper limit of human hearing), the ADC needs to collect
 samples at least twice that frequency (in this case, 40,000 samples per second),
 in order to be able to reproduce the full spectrum of the signal accurately once
 digitised.
+
+Some common industry-wide sampling rates used in audio:
+  * Digital telephony: 8kHz
+  * Digital Audio Tape (DAT) lowest rate: 32kHz
+  * Compact disc (Redbook audio): 44.1kHz
+  * DVD-Video audio soundtrack: 48kHz
+  * Digital Audio Tape (DAT) highest rate: 48kHz
 
 
 Aliasing
@@ -366,7 +379,7 @@ Sample depth
 ------------
 
 The sample depth refers to the number of binary bits allocated in digital
-storage for each sample - typical sample depths are normally 8 bits for
+storage for each sample - typical sample depths are normally 8-12 bits for
 low-quality audio sources (e.g. telephony, older computers and video games) and
 16, 20 or 24-bit for higher-quality sources (e.g. CDs, DVDs, modern video
 games).
@@ -378,12 +391,12 @@ Sample levels are usually represented as an integer within a fixed range; e.g.
 The upper and lower bounds of the sample level refer to the negative and
 positive rails of the equivalent analogue signal respectively. Halfway between
 these two rails is the zero-level; for signed samples this is a sample value of
-0 (a digital recording containing nothing but zero-valued samples is completely
+0 (a digital recording containing nothing but zero-level samples is completely
 silent).
 
 The sample depth determines the maximum dynamic range of the digital recording.
-Each extra bit of sample depth improves the max. DR by 6dB. A Compact Disc has
-16-bit sample depth and can offer a DR of up to 96dB.
+Each extra bit of sample depth improves the maximum DR by 6dB. A Compact Disc
+has 16-bit sample depth and can offer a DR of up to 96dB.
 
 Sample depths above 20 bits are generally pointless in presentation-oriented
 audio formats, as this corresponds to a DR of 120dB; setting the playback volume
@@ -399,9 +412,13 @@ each reference or update.
 
 Sample levels can also be represented using IEEE 754 single/double precision
 binary floating point numbers (between -1.0 and +1.0, with 7 or 15 significant
-figures accuracy, 32/64-bits storage); this form is typically used during audio
-post-production when large amounts of layering or processing/filtering is done
-to minimise rounding error during intermediate calculations.
+figures accuracy, 32/64-bits storage respectively).
+
+This form is typically used as intermediate storage during audio post-production
+when large amounts of layering or processing/filtering is done to minimise
+rounding error. It also allows for temporary overshoot beyond the rails (when
+adjusting volume levels), but this must be corrected by the editor before
+converting samples back into integers for final mastering.
 
 
 Digital Full Scale
@@ -421,7 +438,7 @@ represented without clipping distortion in a digital recording is referred to as
 Digital Full Scale.
 
 The volume level of a digital signal is often represented as a decibel measure
-relative to digital full scale, written as dBFS ("decibel full-scale"). A dbFS
+relative to digital full scale, written as dBFS ("decibel full-scale"). A dBFS
 quantity is *always* non-positive, since as mentioned above it's not possible to
 represent amplitudes beyond the rails.
 
@@ -488,8 +505,8 @@ DC-offset / High-pass filter
 ----------------------------
 
 A common problem in audio circuits, both analogue and digital, is when the
-ground voltage is not correctly calibrated (often due to low-cost wide tolerance
-electrical components being used), or is allowed to be influenced by
+signal ground voltage is not correctly calibrated (often due to low-cost wide
+tolerance electrical components being used), or is allowed to be influenced by
 RF interference or ground loops.
 
 You may find when digitising audio with a cheap low-end consumer sound card,
@@ -498,7 +515,7 @@ can reduce the amount of dynamic range that can be utilised before hard-clipping
 occurs.
 
 For example, one of the test sound cards I used for Trackcutter was an old
-Creative Soundblaster 16 from the mid-1990s. When capturing from line-in at
+Creative SoundBlaster 16 from the mid-1990s. When capturing from line-in at
 16-bit sample depth, I found the sample level always hovered around +256 when
 the input source was completely quiet, effectively reducing the maximum dynamic
 range by ~0.06dB.
@@ -509,8 +526,9 @@ range that can be used, as one rail becomes closer than the other when
 considering the input audio signal.
 
 Prolonged exposure of DC-offset can also be bad for speakers and headphones, as
-they can overheat the magnetic coils. The presence of DC-offset also makes it
-impossible for software to calcuate the actual RMS volume of the signal as well.
+they can overheat the magnetic coils (since there's continuous current flowing
+through them). The presence of DC-offset also makes it impossible for software
+to calculate the true RMS volume of the signal.
 
 There are two ways to remove DC-offset from a digitised signal.
 
@@ -529,12 +547,11 @@ Trackcutter features an optional high-pass filter that has a corner frequency of
 20Hz; as this is the lower bound of human hearing, it should generally be
 harmless to enable the HPF to remove any DC-offset in the signal.
 
-
 Lossless audio format
 ---------------------
 
-In computer audio file formats, there are various different methods of
-representing and encapsulating the digital audio data.
+In computer audio file formats, there are various different methods of encoding
+and encapsulating the digital audio data.
 
 One way is to simply store some basic meta-information about the audio stream in
 the file header (an agreed-upon data structure at the start of the file), such
@@ -544,7 +561,7 @@ Then following the header, the actual PCM samples are written out sequentially,
 one frame at a time, without any alteration.
 
 This is referred to as a lossless audio format (the above is a layman's
-description of the Microsoft Windows .WAV file format). Lossless audio formats
+description of the Microsoft Windows `.wav' file format). Lossless audio formats
 preserve the full accuracy of the recording precisely (ideal for archiving),
 however this can come at the cost of high data storage requirements.
 
@@ -576,7 +593,7 @@ into segments (ideally when you already know exactly what needs to be done,
 instead of using a GUI editor program to do the cutting/splicing for you).
 
 This is where raw audio formats come into play; like lossless formats above,
-they store the PCM samples linearily without alteration. The difference is that
+they store the PCM samples linearly without alteration. The difference is that
 there's no header containing meta-information; the sampling rate, bit depth,
 number of channels and sample format need to be told to each application that
 deals with the file.
