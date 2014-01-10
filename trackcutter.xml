@@ -904,10 +904,10 @@ deterioration in sound quality.</para>
 
 <para>No major bugs are presently known at this time of writing.</para>
 
-<para>If you discover any other bugs in Trackcutter, feel free to report
-them (see the "COPYRIGHT" section for my contact e-mail address). Please
-ensure that your report contains the following, to ensure that I have
-the best chance of reproducing the bug:</para>
+<para>If you discover any other bugs in Trackcutter, feel free to report them
+(see the "COPYRIGHT" section for my contact e-mail address). Please ensure that
+your report contains the following, so that I have the best chance of
+reproducing the bug:</para>
 
 <itemizedlist>
 <listitem><para>Your system's hardware and operating system

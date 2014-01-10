@@ -511,9 +511,9 @@ formats, such as 16-bit integers. It may even be possible to use SIMD
 instruction sets (e.g. MMX/3DNow/SSE) to speed up some operations, if initial
 benchmarking tests show these optimisations to be worthwhile.
 
-If you discover any other bugs in Trackcutter, feel free to report them.
-Please ensure that your report contains the following, to ensure that I
-have the best chance of reproducing the bug:
+If you discover any other bugs in Trackcutter, feel free to report them. Please
+ensure that your report contains the following, so that I have the best chance
+of reproducing the bug:
 
     * Your system's hardware and operating system configuration
     * Compiler version that you compiled Trackcutter with, if built from
