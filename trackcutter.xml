@@ -1,0 +1,1166 @@
+<!--trackcutter: Automatically splices multi-song analogue recordings
+    Copyright (C) 2011-2014 Bryan Rodgers <rodgersb@it.net.au>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or (at
+    your option) any later version.
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>. -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<refentry id="trackcutter">
+
+<refmeta>
+    <refentrytitle>trackcutter</refentrytitle>
+    <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+    <refname>trackcutter</refname>
+    <refpurpose>Divides an audio recording into multiple tracks delimited by silence.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+
+    <cmdsynopsis>
+        <command>trackcutter</command>
+        <arg choice="opt">--cut</arg>
+        <arg choice="opt">--cuts-file=<replaceable>cutsfile</replaceable></arg>
+        <group choice="opt">
+            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+        </group>
+        <arg choice="plain"><replaceable>file</replaceable></arg>
+    </cmdsynopsis>
+
+    <cmdsynopsis>
+        <command>trackcutter</command>
+        <arg choice="req">--extract-dir=<replaceable>dir</replaceable></arg>
+        <group choice="opt">
+            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+        </group>
+        <arg choice="plain"><replaceable>file</replaceable></arg>
+    </cmdsynopsis>
+
+    <cmdsynopsis>
+        <command>trackcutter</command>
+        <arg choice="req">--analyse</arg>
+        <group choice="opt">
+            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+        </group>
+        <arg choice="plain"><replaceable>file</replaceable></arg>
+    </cmdsynopsis>
+
+</refsynopsisdiv>
+
+<refsect1>
+<title>DESCRIPTION</title>
+
+<para>Trackcutter is a tool that automates the splicing of digitised analogue
+recordings containing multiple songs delimited by short periods of relative
+silence.</para>
+
+<para>It uses heuristics to reliably detect these silent passages despite the
+presence of noise artifacts endemic of analogue audio equipment, such as
+background hiss, DC-offset and transient clicks and pops.</para>
+
+<para>The envisioned use for Trackcutter is to assist with digital capture of
+music from compact cassettes and vinyl record albums, so the individual songs
+can be indexed and played back on a portable digital music player. (It also can
+be used to capture background music from video game consoles, especially if the
+game has a "jukebox" mode in its menu).</para>
+
+<para>Trackcutter allows you to lazily capture each side of these media at a
+time into a single large audio file. It will then search that large file for
+intervening silence between songs and divide that file into smaller clips that
+correspond to each song, so you can encode the individual song files into a
+lossy format to play on a portable digital music player.</para>
+
+<para>There's no need to search through the recording in an audio editor and
+determine the running times of each song. This reduces the manual intervention
+required as much as possible, in case you have a large music collection that you
+want digitised and need to minimise average time spent on each album.</para>
+
+</refsect1>
+
+<refsect1>
+<title>MODES OF OPERATION</title>
+
+<para>The first invocation mode listed above scans through an audio file and
+generates a report of the start/end timecodes and durations of each song it
+discovers. This report can be saved to a text file in case you want to use an
+external program to perform the cutting, or want to verify the timecodes with an
+audio player program first.</para>
+
+<para>The second invocation mode listed above is similar to the first, except
+Trackcutter will instead extract each song into a separate audio file.</para>
+
+<para>The third invocation mode listed above is a special analyser mode which is
+useful for determining the minimum and maximum volume levels in an audio file
+and if any DC-offset is present. It can be used to determine the noise floor of
+a source medium if you supply a short stint of relative silence.</para>
+
+</refsect1>
+
+<refsect1>
+<title>MODE OPTIONS</title>
+
+<para>Only one of the following options may be given:</para>
+
+<variablelist>
+
+<varlistentry><term><option>-C</option>, <option>--cut</option></term>
+<listitem>
+<para>Search the input audio file for intervening periods of silence between
+songs. This is the default mode if no mode option is given.</para>
+
+<para>If the <option>--extract-dir</option> option was <emphasis>not</emphasis> given,
+then Trackcutter will print to standard output (or write to the file specified
+by <option>--cuts-file</option> if specified) a table similar to the following:</para>
+
+<screen>
+    track_num   start_time      end_time        duration_time
+             1   0:00:05.52297   0:02:54.62875       0:02:49.10578
+             2   0:02:59.22587   0:11:36.71757       0:08:36.49170
+             3   0:11:39.61410   0:18:34.12678       0:06:54.51267
+             4   0:18:38.01732   0:22:06.83412       0:03:27.81680
+             5   0:22:10.01072   0:28:54.39791       0:06:44.38718
+             6   0:28:58.93770   0:37:14.18437       0:08:15.24666
+             7   0:37:18.75163   0:41:05.34419       0:03:46.59256
+</screen>
+
+<para>This table shows the start/end timecodes and the durations of each song
+that Trackcutter has found in the input recording. If the
+<option>--track-names-file</option> was given (see below), then the name
+assigned to each track will be printed in an additional column titled
+"<literal>name</literal>" to the right of
+"<literal>duration_time</literal>".</para>
+
+<para>This allows you to check if the time indices are correct (as Trackcutter
+can sometimes make mistakes - see the "CAVEATS" section below), or if you wish
+to use another audio editing program to cut the file up.</para>
+
+<para>If the <option>--extract-dir</option> was given, then the audio between
+each of the start/end points will be written out to separate files. The files
+will be sequentially numbered (using the track number padded out to 8 digits)
+unless <option>--track-names-file</option> is given. The output files will have
+the same extension and format as the input file (unless the
+<option>--output-format</option> option is used).</para>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-a</option>, <option>--analyse</option></term>
+
+<listitem>
+
+<para>Performs statistical analysis on the given file. Trackcutter will print to
+standard output a table similar to the following (one column shown for each
+channel).</para>
+
+<screen>
+    statistic                left_channel       right_channel
+        positive_peak  +0.072729767000648  +0.002614032082205
+        negative_peak  -0.002293943739325  -0.009167754394247
+            peak_dbfs  -22.76575607491384  -40.75474060092774
+              min_rms  +0.000927738163780  +0.000928476795361
+              max_rms  +0.020431176301150  +0.002620367617299
+              avg_rms  +0.001066680673239  +0.001010606534889
+         min_rms_dbfs  -60.65149155472916  -60.64457891489636
+         max_rms_dbfs  -33.79413257298738  -51.63275552501676
+         avg_rms_dbfs  -59.43931147291985  -59.90835795616869
+            dc_offset  +0.000000000000000  +0.000000000000000
+       dc_offset_dbfs                -inf                -inf
+    fix_dc_offset_arg  --dc-offset=-0.000000,-0.000000
+</screen>
+
+<para>Explanation of each field:</para>
+
+<variablelist>
+
+<varlistentry>
+<term><literal>positive_peak</literal>, <literal>negative_peak</literal></term>
+<listitem><para>The positive and negative peak levels of the signal, normalised
+onto a scale of -1.0 for the negative rail and +1.0 for the positive rail. 0.0
+refers to the signal ground rail.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>peak_dbfs</literal></term>
+<listitem><para>Loudest signal level (furthest away from ground rail) in the
+recording, expressed as a decibel quantity relative to digital full scale
+(dBFS). If this figure is greater than -3dBFS, then it's possible that your
+recording level was too high during capture and that some parts of the signal
+may have been clipped.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>min_rms</literal>, <literal>max_rms</literal>, <literal>avg_rms</literal></term>
+<listitem><para>Minimum, maximum and average normalised Root Mean Square (RMS)
+volume levels in the recording. 1.0 corresponds to digital full
+scale.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>min_rms_dbfs</literal>, <literal>max_rms_dbfs</literal>, <literal>avg_rms_dbfs</literal></term>
+<listitem><para>Minimum, maximum and average Root Mean Square (RMS)
+volume levels expressed in dBFS.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>dc_offset</literal></term>
+
+<listitem><para>Normalised level of DC-offset in the signal. If this is
+non-zero, then there may be some inherent DC-offset in your analogue source
+equipment, or the ADC circuit in the sound card used to digitise the signal. If
+the <option>--high-pass</option> option is given, then this value will be
+zero.</para></listitem>
+
+</varlistentry>
+
+<varlistentry>
+<term><literal>dc_offset_dbfs</literal></term>
+
+<listitem><para>The distance of the DC-offset from the closest of the negative
+or positive rails, expressed in dBFS. "<literal>-inf</literal>" (negative
+infinity) will be printed if there is no DC-offset in the
+signal.</para></listitem>
+
+</varlistentry>
+
+<varlistentry>
+<term><literal>fix_dc_offset_arg</literal></term>
+<listitem><para>Supply this argument to Trackcutter in
+<option>--cut</option> mode to cancel out the above reported DC-offset.</para></listitem>
+</varlistentry>
+
+</variablelist>
+</listitem>
+</varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>OPTIONS APPLICABLE IN ALL MODES</title>
+
+<para>The following options apply to both <option>--cut</option> and
+<option>--analyse</option> modes documented above.</para>
+
+<para>If the long form of an option takes a mandatory argument, then the
+short form of that option also requires an argument (must either
+immediately follow or be separated by a space). For example, the options
+<option>-t0:10-15:00</option>, <option>-t 0:10-15:00</option> and
+<option>--time-range=0:10-15:00</option> are all synonymous.</para>
+
+<refsect2>
+<title>Help/Diagnostic</title>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-h</option>, <option>--help</option></term>
+<listitem><para>Display brief options summary and exit.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-v</option>, <option>--verbose</option></term>
+<listitem><para>Display diagnostic information on standard error while
+Trackcutter is processing the audio stream. Mainly intended for the developer
+during debugging, but can sometimes be helpful in explaining what's
+happening.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-V</option>, <option>--version</option></term>
+<listitem><para>Display program version and exit.</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect2>
+
+<refsect2>
+<title>Time Range Selection</title>
+
+<para>These restrict searching/analysis to a sub-section of the input file.</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-t</option>, <option>--time-range=<replaceable><optional>START</optional></replaceable>-<replaceable><optional>FINISH</optional></replaceable></option></term>
+<listitem>
+
+<para>Only process the portion of the input file between given boundary
+timecodes.</para>
+
+<para>If the start time before the hyphen is omitted, then the beginning of the
+file is implied.</para>
+
+<para>If the finish time after the hyphen is omitted, then the end of the file
+is implied.</para>
+
+<para>The start and finish timecodes may be given in one of the following forms:</para>
+
+<itemizedlist>
+<listitem><para><replaceable>hh</replaceable>:<replaceable>mm</replaceable>:<replaceable>ss.sss</replaceable></para></listitem>
+<listitem><para><replaceable>mm</replaceable>:<replaceable>ss.sss</replaceable></para></listitem>
+<listitem><para><replaceable>ss.sss</replaceable></para></listitem>
+</itemizedlist>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-I</option>, <option>--frame-range=<replaceable><optional>START</optional></replaceable>-<replaceable><optional>FINISH</optional></replaceable></option></term>
+<listitem>
+
+<para>Only process the portion of the input file between given boundary
+frame indices.</para>
+
+<para>In digital audio terminology, a <firstterm>frame</firstterm> is a
+collection of samples, one for each channel in the audio stream, that pertain to
+a precise particular instant of time. Frame indices are always given as
+non-negative integers.</para>
+
+<para>For example, say we have a file that has a sampling rate of 48kHz has
+48000 frames per second. In this file, frame index 96000 refers to the point
+exactly two seconds from the start of the file.</para>
+
+<para>As with <option>--time-range</option>, if the start index before the
+hyphen is omitted, then the beginning of the file is implied. If the finish
+index after the hyphen is omitted, then the end of the file is implied.</para>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect2>
+
+<refsect2>
+<title>DC-Offset Correction</title>
+
+<para>Note that many sound cards (especially lower-end ones) may induce a small
+amount of DC-offset in the digitised signal when capturing from an input
+analogue source. This is usually caused by unnecessarily wide tolerances in
+components used in the ADC circuits allowing the manufacturer to reduce
+costs.</para>
+
+<para>During testing of Trackcutter I have observed one sound card produce
+DC-offset as high as +256 for 16-bit sample depth (subject was a mid-1990's
+Creative SoundBlaster 16). That's probably not the worst of what's out
+there...</para>
+
+<para>Most audio recording software programs do not account for or filter out
+this DC-offset when writing audio files to disk. If any DC-offset is not
+corrected when Trackcutter processes the input audio file, it will cause errors
+in the RMS volume-level calculations. This may result in Trackcutter overlooking
+silent passages and concatenating multiple consecutive songs together in the one
+output file.</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-D</option>, <option>--dc-offset=<replaceable>OFS0</replaceable><optional>,<replaceable>OFS1</replaceable>...</optional></option></term>
+<listitem>
+<para>Applies DC-offset correction to the signal before any further
+processing; one offset must be given per channel in the input file.</para>
+
+<para>Correction offsets are given as normalised signal level values (real
+numbers) with 1.0 being the distance between the ground voltage level and the
+negative or positive rails.</para>
+
+<para>For example, in an input file with 16-bit sample depth, an offset of
+<literal>-0.125</literal> means "subtract <literal>4096</literal> from each raw
+sample value".</para>
+
+<para>The <option>--analyse</option> mode can give a suggested set of values for
+a given input file, if you're not sure what correction factor is needed.
+Alternatively you can use the <option>--high-pass</option> option
+instead.</para>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-H</option>, <option>--high-pass</option></term>
+<listitem>
+
+<para>Applies a high-pass filter (3dB attenuation at 20Hz) to the signal before
+any further processing.</para>
+
+<para>This is an alternate and <emphasis>strongly-recommended</emphasis> means
+of removing DC-offset from the signal. It may delay the output audio by a few
+milliseconds at most, but this should be harmless in nearly all cases.</para>
+
+<para>In a future version of Trackcutter, this option may
+become enabled by default, with an alternative option to disable it.</para>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect2>
+
+<refsect2>
+<title>Input File Options</title>
+<variablelist>
+
+<varlistentry>
+<term><option>-r</option>, <option>--raw</option></term>
+<listitem>
+
+<para>Indicates that the input file is a raw (headerless) array of PCM samples.</para>
+
+<para>If you use this option, you will need to use the options in the next
+section to tell Trackcutter about the following aspects of
+the input file. No defaults are assumed; Trackcutter will
+abort with an error message if anything is left undefined.</para>
+
+<itemizedlist>
+<listitem><para>Sampling rate (Hz)</para></listitem>
+<listitem><para>Sample depth (bits per sample)</para></listitem>
+<listitem><para>Number of channels</para></listitem>
+<listitem><para>Endian-ness of the sample words (big or little endian?)</para></listitem>
+<listitem><para>Sample format (signed/unsigned integer, or IEEE 754 floating point?)</para></listitem>
+</itemizedlist>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect2>
+
+<refsect2>
+<title>Raw Input File Options</title>
+
+<para>These options are to be used with the <option>--raw</option> option
+above.</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-R</option>, <option>--rate=<replaceable>N</replaceable></option></term>
+<listitem><para>Sampling rate, given as an integer quantity in hertz.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-c</option>, <option>--channels=<replaceable>N</replaceable></option></term>
+<listitem><para>Number of channels (1-8)</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-b</option>, <option>--bits=<replaceable>N</replaceable></option></term>
+<listitem><para>Number of bits per sample. Valid sizes are 8, 16, 24 or 32 for
+signed integer formats, or 32 or 64 for floating point (corresponding to IEEE
+754 single/double precision respectively). Unsigned integer formats can only be
+8-bits wide (libsndfile limitation).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-x</option>, <option>--signed</option></term>
+<listitem><para>PCM samples are in signed 2's complement integer format.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-u</option>, <option>--unsigned</option></term>
+<listitem><para>PCM samples are in unsigned integer format.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-X</option>, <option>--floating-point</option></term>
+<listitem><para>PCM samples are in IEEE 754 floating point binary format.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-E</option>, <option>--big-endian</option></term>
+<listitem><para>Multi-byte PCM sample words are to be interpreted as big-endian.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-e</option>, <option>--little-endian</option></term>
+<listitem><para>Multi-byte PCM sample words are to be interpreted as little-endian.</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect2>
+
+</refsect1>
+
+<refsect1>
+<title>SUB-MODE OPTIONS APPLICABLE IN CUTTING MODE</title>
+
+<para>If the <option>--cut</option> mode is selected, then at most one of the
+following arguments should be given:</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-o</option>, <option>--cuts-file=<replaceable>CUTSFILE</replaceable></option></term>
+<listitem>
+<para>Writes a list of track indices (see the table above in the
+<option>--cut</option> description for an example) to the file named in
+<replaceable>CUTSFILE</replaceable>. If this option is omitted or a hyphen
+`<literal>-</literal>' is given, then the track indices will be sent to standard
+output.</para>
+<para>See the section "OPTIONS APPLICABLE IN CUTS-FILE MODE" for options that
+tweak this output.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-d</option>, <option>--extract-dir=<replaceable>DIR</replaceable></option></term>
+<listitem>
+
+<para>Extracts the audio for each song into separate files in directory
+<replaceable>DIR</replaceable>.</para>
+
+<para>If the <option>--track-names-file</option> option is not given, then the
+files will be named
+<filename><replaceable>NNNNNNNN</replaceable>.<replaceable>ext</replaceable></filename>,
+where <replaceable>NNNNNNNN</replaceable> is the track number, and
+<replaceable>ext</replaceable> is the same extension as the input file, unless a
+different type has been given by the <option>--output-format</option>
+option.</para>
+
+<para>See the section "OPTIONS APPLICABLE IN EXTRACTION MODE" for options that
+can be used to configure the writing of output files.</para>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>OPTIONS APPLICABLE IN CUTTING MODE</title>
+
+<para>The following options can be used when the <option>--cut</option> mode is
+selected.</para>
+
+<refsect2>
+<title>Track File Naming Options</title>
+
+<variablelist>
+
+<varlistentry>
+<term>
+    <option>-i</option>,
+    <option>--track-names-file=<replaceable>LISTFILE</replaceable></option>
+</term>
+<listitem>
+<para>Provides track names in a separate text file.</para>
+
+<para>When extracting songs into individual audio files in
+<option>--extract-dir</option> mode, Trackcutter will use each track name as a
+basis for the filename of that track, instead of the default
+<filename><replaceable>NNNNNNNN</replaceable>.<replaceable>ext</replaceable></filename>
+naming scheme.</para>
+
+<para>The text file must contain one song name per line. There should be no
+blank lines. Since the names will be used as the base part of the file names,
+the track names must <emphasis>not</emphasis> contain any characters that are
+forbidden by your OS's file system naming conventions.</para>
+
+<para>Under UNIX-like OSes, forward slashes `<literal>/</literal>' must not be used.</para>
+
+<para>Under Microsoft Windows, the following characters must not be used:
+<literal>" * / : &lt; &gt; ? \ | + , ; = [ ]</literal></para>
+
+<para>The track names must not contain a trailing file extension, as Trackcutter
+will append one automatically.</para>
+
+<para>If a hyphen `<literal>-</literal>' is given for
+<replaceable>LISTFILE</replaceable>, then the list of track names will
+be read from standard input.</para>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect2>
+
+<refsect2>
+<title>Track Delimiting Options</title>
+
+<para>These options may be useful in fine-tuning Trackcutter's search algorithm
+if you find it isn't detecting silence intervals between songs correctly,
+resulting in either multiple songs being concatenated into the one file, or one
+song being split up into multiple files.</para>
+
+<variablelist>
+
+<varlistentry>
+<term>
+    <option>-S</option>,
+    <option>--noise-floor=<replaceable>DBFS</replaceable></option>
+</term>
+<listitem>
+<para>Noise floor used for discriminating music from silence. Given as a
+negative real number decibel quantity, relative to digital full scale
+(dBFS).</para>
+
+<para>Trackcutter's algorithm considers any portion of the signal that's quieter
+than this noise floor threshold to be intervening silence, and any portion
+that's louder to be potentially music (or transient spike noise), depending on
+how long the signal remains above this threshold.</para>
+
+<para>The default is -48dBFS. This should cover nearly all fairly noisy analogue
+source media, especially compact cassettes without noise reduction and the
+linear audio track on VHS tapes.</para>
+
+<para>However in source mediums that have much better Signal:Noise Ratios (SNR),
+such as some vinyl records, VHS Hi-Fi tapes and recordings of video game console
+soundtracks, it may lead to the trailing fade-out (or leading fade-in) of some
+songs being prematurely cut off. To compensate, you can try decreasing this
+number.</para>
+
+<para>A good starting point for better-quality cassettes would be -53dBFS. For
+better-quality vinyl records, you can try something like -60dBFS.</para>
+
+<para>You may also need to decrease this number if the audio was captured at a
+too-low recording level (e.g. if the peaks of the recording do not reach at
+least -18dBFS).</para>
+
+<para>If the noise floor is too low, then Trackcutter may fail to detect the
+intervening silence between songs and will end up concatenating multiple songs
+into one file. Increasing this number may improve the silence detection.</para>
+
+<para>See the "EXAMPLES" section below for a brief tutorial on how to determine
+the appropriate noise floor setting for your source material.</para>
+
+<para>The lowest possible setting for the noise floor depends on the sample
+depth of the input recording:</para>
+
+<itemizedlist>
+<listitem><para>An 8-bit recording can only have 48dB dynamic range at
+most, so settings less than -48dBFS are pointless.</para></listitem>
+<listitem><para>16-bit recordings should not have a noise floor set to less than
+-96dBFS.</para></listitem>
+</itemizedlist>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+    <option>-s</option>,
+    <option>--min-silence-period=<replaceable>MSEC</replaceable></option>
+</term>
+<listitem>
+<para>This is the minimum silence gap that Trackcutter will expect between songs. It's
+given in milliseconds. The default is 2000 (two seconds), which I believe is
+reasonable in most cases.</para>
+
+<para>Sometimes you may need to increase this value if a song contains a bar of
+silence mid-way through (i.e. transitioning between movements in a longer piece,
+or an A capella verse), so that Trackcutter doesn't divide the song up into two
+separate files at that point.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+    <option>-n</option>,
+    <option>--min-signal-period=<replaceable>MSEC</replaceable></option>
+</term>
+<listitem>
+<para>This is the minimum period of non-silence (continuous signal above the noise
+floor) that constitutes the start of a song. It's also given in milliseconds.</para>
+
+<para>This parameter helps Trackcutter distinguish between the actual start of a song
+and transient analogue spike noise (such as clicks and pops).</para>
+
+<para>The default is 100 milliseconds (one-tenth of a second).</para>
+
+<para>If your source material has songs that start in near-silence with a
+pulse-train of short transient percussive instruments (e.g. claves, hi-hat, bass
+drum, heartbeat, drummer hitting their sticks together to set the tempo for the
+other band members, some other sound effect, etc.), and Trackcutter is omitting
+that lead-in, then reducing this value can sometimes help.</para>
+
+<para>Typically such a percussive intro will feature some degree of
+reverberation (which makes detection easier), whereas transient spike noise
+won't (since that's not acoustically generated).</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+    <option>-l</option>,
+    <option>--min-track-length=<replaceable>SEC</replaceable></option>
+</term>
+<listitem>
+<para>This is the minimum length of time that Trackcutter will assume a song
+runs for. Unlike the other options, this one is given in seconds.</para>
+
+<para>Once Trackcutter finds the start of a song, it will not resume searching
+for silence until this period has elapsed.</para>
+
+<para>The idea behind this option is allow Trackcutter to properly delimit songs
+that feature a short vocal-only, "musique concrete" or off-beat/avant-garde
+intro, immediately followed by a short pause, then the main bars of the song
+begin.</para>
+
+<para>One classic example is Pink Floyd's "Echoes" from their 1971 "Meddle"
+album, which begins with a slowly-repeating submarine sonar "ping" sound, before
+the keyboards gradually fade-in.</para>
+
+<para>The default is forty seconds.</para>
+
+<para>If you find Trackcutter is treating the intro as a separate track to the
+main part of the song, then try setting this value to greater than the
+length of the intro.</para>
+
+<para>The value of this setting should never exceed the duration of the shortest
+song in the recording, otherwise it may cause Trackcutter to concatenate two
+songs together in one file.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect2>
+
+<refsect2>
+<title>Track Numbering Options</title>
+
+<variablelist>
+
+<varlistentry>
+<term>
+    <option>-T</option>,
+    <option>--track-range=<replaceable>A</replaceable>-<replaceable>B</replaceable></option>
+</term>
+<listitem>
+
+<para>Instructs Trackcutter that the first track should be numbered
+<replaceable>A</replaceable>, and to stop searching for more songs after
+track number <replaceable>B</replaceable> is identified.
+<replaceable>A</replaceable> and <replaceable>B</replaceable> must be
+positive integers, and <replaceable>A</replaceable> must not be greater
+than <replaceable>B</replaceable>.</para>
+
+<para>In <option>--extract-dir</option> mode, this impacts on how the
+output files are named. Trackcutter will also skip over the first
+<replaceable>A</replaceable> names in the file given by
+<option>--track-names-file</option>.</para>
+
+<para>The idea behind this option is to allow you to use multiple
+invocations of Trackcutter on different sections of the same input file
+with slightly different parameters, in case you have a difficult
+recording that has varying background noise levels or inconsistent
+silence separation between songs.</para>
+
+<para>Note that this option does not cause Trackcutter to ignore any
+earlier songs in the actual input recording; you will also likely need
+to use the <option>--time-range</option> or
+<option>--frame-range</option> options described above to instruct
+Trackcutter to start searching from where the previous invocation of
+Trackcutter left off.</para>
+
+<para>If <replaceable>A</replaceable> is omitted, numbering starts from
+track #1 (default behaviour).</para>
+
+<para>If <replaceable>B</replaceable> is omitted, searching continues
+until the end of the input file is reached (default behaviour).</para>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect2>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS APPLICABLE IN CUTS-FILE MODE</title>
+
+<para>If the <option>--cut</option> and <option>--cuts-file</option>
+options are given, then the following options may be used to format the
+track indices table output (if a script or other program needs to parse
+the entries):</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-p</option>, <option>--print-time-indices</option></term>
+<listitem>
+<para>Print start/finish indices and song durations in
+<replaceable>hh</replaceable>:<replaceable>mm</replaceable>:<replaceable>ss.sss</replaceable>
+format. This is the default setting.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-P</option>, <option>--print-frame-indices</option></term>
+<listitem><para>
+Print start/finish indices and song durations in frames.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-A</option>, <option>--print-sec-indices</option></term>
+<listitem>
+<para>Print start/finish indices and song durations as an absolute real
+number of seconds. Can be useful if you need to perform arithmetic on
+these offsets.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-N</option>, <option>--no-cuts-file-header</option></term>
+<listitem>
+<para>Suppresses the table header (first line) of the output.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>OPTIONS APPLICABLE IN EXTRACTION MODE</title>
+
+<para>These options are only relevant if the <option>--extract-dir</option> is given.</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>-f</option>, <option>--output-format=<replaceable>EXT</replaceable></option></term>
+<listitem>
+<para>Write output files in the audio file format designated by <replaceable>EXT</replaceable>.</para>
+<para>For a list of valid formats supported, run Trackcutter with the
+<option>--help</option>. A table of supported formats will be shown at
+the bottom of the help message.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+
+<para>The one thing that Trackcutter does not, and likely will never
+have direct access to is a pair of human ears. (Willing volunteers are
+advised to lend their ears and brains to scientific research in the
+field of aural machine perception.)</para>
+
+<para>This means that all the heuristics featured are mathematically-defined
+best-guess attempts that should work for most recordings, but some tricky corner
+cases may cause it to produce incorrect results.</para>
+
+<para>It's recommended that you quickly skim-listen through the output
+files Trackcutter generates to make sure that the output is what you
+expect it to be, and be prepared to tweak some options (see the "TRACK
+DELIMITING OPTIONS" section above) if Trackcutter makes a
+mistake.</para>
+
+<para>The <emphasis>big</emphasis> caveat is that Trackcutter cannot
+help you with an album where each song smoothly segues into the next
+(without any pause of silence). Trackcutter simply sees the recording as
+one big song, and won't know how to detect the transition. The best it
+can do here is trim off the leading and trailing silence.</para>
+
+<para>In this case you're better off using a sound editing program like
+Audacity to chop up the recording if you want to index the individual
+tracks.</para>
+
+<para>Well known examples of this type of album are Pink Floyd's 1973 album "Dark Side
+Of The Moon" and Jean-Michel Jarre's 1976 album "Oxygene".</para>
+
+<para>If the source audio media suffers drop-outs (e.g. a compact
+cassette that has been partially damaged by close proximity to a magnet,
+or if sections of the tape have become warped or been re-spliced), then
+Trackcutter may also mistake these sections for intervening silence
+between songs.</para>
+
+<para>While Trackcutter (through libsndfile) supports a few lossy audio
+formats (in addition to the myriad lossless formats) such as Ogg Vorbis,
+it's usually not recommended to use such a lossy format as input/output
+(unless you are severely limited in available disk space), because the
+repeated lossy re-encoding of the audio signal can cause increased
+deterioration in sound quality.</para>
+
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+
+<para>No major bugs are presently known at this time of writing.</para>
+
+<para>If you discover any other bugs in Trackcutter, feel free to report
+them (see the "COPYRIGHT" section for my contact e-mail address). Please
+ensure that your report contains the following, to ensure that I have
+the best chance of reproducing the bug:</para>
+
+<itemizedlist>
+<listitem><para>Your system's hardware and operating system
+configuration</para></listitem>
+<listitem><para>Compiler version that you compiled Trackcutter with, if
+built from source.</para></listitem>
+<listitem><para>A description of what you were trying to do, and what
+you were expecting to happen.</para></listitem>
+</itemizedlist>
+
+<para>It's best not to attach large input audio files (e.g. hundreds of
+megabytes or more) on the initial bug report, as it can cause problems
+with e-mail reception. Be sure to retain any files that trigger
+potential bugs though, as I may ask for an alternative way to send them
+electronically if I can't reproduce the problem myself on my test data
+set.</para>
+
+</refsect1>
+
+<refsect1>
+<title>EXAMPLES</title>
+
+<para>These examples assume that you're running Linux, with ALSA (Advanced Linux
+Sound Architecture) configured for interfacing with your computer's audio
+hardware. Note that Trackcutter itself does not access sound devices directly -
+the ALSA commands are only included to paint the bigger picture for a use
+case.</para>
+
+<para>If you run another operating system, you'll need to read your OS's
+documentation on how to digitally capture an audio signal to a disk file, and
+substitute those commands as appropriate.</para>
+
+<para>Let's say I have a compact audio cassette that I want to digitise, which has
+two sides of 45mins each. I have a tape deck with its line-out hooked up to
+my computer sound card's line-in port.</para>
+
+<para><emphasis>Note:</emphasis> If you're capturing audio from a vinyl record
+or some other analogue audio equipment, simply substitute the directions
+involving the tape player with the equivalent for that device; e.g. "press
+<keycap>PLAY</keycap> on tape deck" could also mean "lower needle on vinyl
+record".</para>
+
+<refsect2>
+<title>Determining the noise floor of your source media</title>
+
+<para>Firstly, we'll need to know what the noise floor level is for your source media.
+Trackcutter expects the noise floor to be given as a negative decibel quantity,
+relative to digital full scale (dBFS), so it knows how to discriminate between
+music and intervening silence.</para>
+
+<para>What I recommend doing is recording a 5-10 second stint of background
+noise, by positioning the cassette to a silent section (either at the very start
+or very end).</para>
+
+<para>Type the following command at the terminal prompt, but only press
+<keycap>ENTER</keycap> immediately after you you press the <keycap>PLAY</keycap>
+button on your tape deck:</para>
+
+<screen>
+    $ arecord --format=cd --duration=10 silence.wav
+</screen>
+
+<para>The <option>--duration=<literal>10</literal></option> option is the number
+of seconds to record for; adjust the number as needed. If you have multiple
+sound cards in your system you may need to select the appropriate sound device
+with the <option>--device</option> option; see the
+<citerefentry><refentrytitle>arecord</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+man page for more information on that.</para>
+
+<para>Stop the tape deck once the terminal prompt reappears, and reposition the
+tape to the start of side-A.</para>
+
+<para><emphasis>Note:</emphasis> Some commercial pre-recorded cassette tapes may
+have a series of short increasing-pitch beeps on the lead-in before the first
+song (this is a cue signal often used at duplication plants for marking the
+start/end of the master recording). You'll need to advance the cassette past
+this point so Trackcutter doesn't accidentally include it as part of the first
+song.</para>
+
+<para>Now let's use Trackcutter to analyse the noise levels of the silence test
+recording. Type the following command:</para>
+
+<screen>
+    $ trackcutter --analyse --high-pass silence.wav
+</screen>
+
+<para>This will produce output similar to the following:</para>
+
+<screen>
+   statistic                left_channel       right_channel
+       positive_peak  +0.072729767000648  +0.002614032082205
+       negative_peak  -0.002293943739325  -0.009167754394247
+           peak_dbfs  -22.76575607491384  -40.75474060092774
+             min_rms  +0.000927738163780  +0.000928476795361
+             max_rms  +0.020431176301150  +0.002620367617299
+             avg_rms  +0.001066680673239  +0.001010606534889
+        min_rms_dbfs  -60.65149155472916  -60.64457891489636
+        max_rms_dbfs  -33.79413257298738  -51.63275552501676
+        avg_rms_dbfs  -59.43931147291985  -59.90835795616869
+           dc_offset  +0.000000000000000  +0.000000000000000
+      dc_offset_dbfs                -inf                -inf
+   fix_dc_offset_arg  --dc-offset=-0.000000,-0.000000
+</screen>
+
+<para>The statistic you're interested in is <emphasis>avg_rms_dbfs</emphasis>;
+this is the average sound level that was observed in the silence test recording,
+and gives a good indicator of the noise floor of the source medium.</para>
+
+<para>If the left and right channels don't match up, then just use the reading
+that is greater; in this case, -59.4dBFS. You might want to give a bit of extra
+margin, say, add another +3dB to the noise floor. For the rest of this case,
+we'll use -56dBFS as the noise floor for this tape example.</para>
+
+<para>The <option>--high-pass</option> option here is strongly recommended. It
+automatically corrects for any DC-offset that may be present in the digitised
+audio signal. This can often happen with lower-end consumer-grade soundcards.
+Without high-pass filtering any DC-offset in the signal will disrupt the RMS
+volume level calculations and cause Trackcutter to make incorrect cutting
+decisions.</para>
+
+</refsect2>
+
+<refsect2>
+<title>Start capturing</title>
+
+<para>Type the following command, but do not press <keycap>ENTER</keycap> until
+you've immediately hit <keycap>PLAY</keycap> on your cassette deck:</para>
+
+<screen>
+    $ arecord --format=cd --duration=$((45*60)) side_a.wav
+</screen>
+
+<para>This captures side-A of the cassette, and automatically stops after 45
+minutes (change the 45 to reflect the length of each side as needed; the
+<option>--duration</option> option takes a number of seconds, hence the shell
+arithmetic expression to multiply minutes by sixty).</para>
+
+<para>If you don't know the durations of each side, then you can omit the
+<option>--duration</option> option completely, but you'll need to press
+<keycombo action="simul"><keycap>Ctrl</keycap><keycap>C</keycap></keycombo> when
+the tape deck reaches the end-of-side to prevent ALSA's
+<command>arecord</command> from happily filling up the rest of the disk.</para>
+
+<para>Repeat the same process for side-B if needed.</para>
+
+</refsect2>
+
+<refsect2>
+<title>Now the fun stuff</title>
+
+<para>When Trackcutter is searching for track lengths and delimiters, there are
+two sub-modes of operation. You can either have it print out the time indices of
+each track (for verification purposes, if you find you may need to tweak the
+parameters, or if you intend to use another program to extract the audio chunks
+yourself), or alternatively have Trackcutter do the extraction for you.</para>
+
+<para>Using the print-cuts-mode of Trackcutter on the recording of
+side-A:</para>
+
+<screen>
+    $ trackcutter --cut --high-pass --noise-floor=-56 side_a.wav
+</screen>
+
+<para>The argument to the <option>--noise-floor</option> option is where you
+specify the noise floor (in dBFS) that was established above.</para>
+
+<para>This will produce a table similar to the following:</para>
+
+<screen>
+    track_num   start_time      end_time        duration_time
+             1   0:00:05.52297   0:02:54.62875       0:02:49.10578
+             2   0:02:59.22587   0:11:36.71757       0:08:36.49170
+             3   0:11:39.61410   0:18:34.12678       0:06:54.51267
+             4   0:18:38.01732   0:22:06.83412       0:03:27.81680
+             5   0:22:10.01072   0:28:54.39791       0:06:44.38718
+             6   0:28:58.93770   0:37:14.18437       0:08:15.24666
+             7   0:37:18.75163   0:41:05.34419       0:03:46.59256
+</screen>
+
+<para>In this example, there are seven songs on side-A of the cassette.
+Trackcutter has determined the start and end timecodes for each track plus their
+duration. The intervening gaps between the songs are silent.</para>
+
+<para>Trackcutter can also extract the individual songs out into separate files,
+ready to be fed to a lossy audio encoder program (if you later intend to place
+the files on a digital music player to play them back):</para>
+
+<screen>
+    $ mkdir side_a_songs
+    $ trackcutter --cut --high-pass --noise-floor=-56 \
+        --extract-dir=side_a_songs/ --verbose side_a.wav
+</screen>
+
+<para>This will extract all the tracks shown above and store them in the
+subdirectory <filename>side_a_songs/</filename>. Each song file will be named
+<filename><replaceable>nnnnnnnn</replaceable>.wav</filename> where
+<replaceable>nnnnnnnn</replaceable> is the track number, starting from 1.</para>
+
+<para>The <option>--verbose</option> option is sometimes suggested so you can
+see what Trackcutter is actually doing. You'll see some diagnostic messages that
+I mainly use for development. If you see a message like "false positive", this
+just means that Trackcutter thought it had found the start of a new song, but it
+turned out to be a transient click or pop artifact.</para>
+
+<para>You can also have Trackcutter automatically name the files with the name
+of each track. Create a text file, and on each line, type the name of each
+track. See the details for the <option>--track-names-file</option> option above
+about restrictions on characters used in track names.</para>
+
+<para>You can then re-run the above Trackcutter command with new arguments:</para>
+
+<screen>
+    $ trackcutter --cut --high-pass --noise-floor=-56 \
+        --extract-dir=side_a_songs/ --verbose \
+        --track-names-file=side_a_tracknames.txt \
+        side_a.wav
+</screen>
+
+<para>It should be self-evident how to repeat these commands for side-B of the
+cassette if needed.</para>
+
+</refsect2>
+
+<refsect2>
+<title>Fine-tuning</title>
+
+<para>See the section "TRACK DELIMITING OPTIONS" above for information on how
+to fine-tune Trackcutter's search parameters if you find it isn't exactly
+capturing what you wanted (e.g. if multiple songs are concatenated together in
+one file, or one song is split among two files). </para>
+
+</refsect2>
+</refsect1>
+
+<refsect1>
+<title>COPYRIGHT</title>
+
+<para>Trackcutter is Copyright (C) 2011-2014 Bryan
+Rodgers <email>rodgersb at it dot net dot au</email></para>
+
+<para>Trackcutter is free software: you can redistribute
+it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.</para>
+
+<para>Trackcutter is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+License for more details.</para>
+
+<para>You should have received a copy of the GNU General Public License
+along with this program. If not, see <ulink
+url="http://www.gnu.org/licenses/"></ulink>.</para>
+
+<para>The Trackcutter source code is hosted online at
+<ulink url="https://github.com/rodgersb/trackcutter"></ulink>.</para>
+
+</refsect1>
+
+</refentry>
