@@ -845,7 +845,7 @@ these offsets.</para>
 <listitem>
 <para>Write output files in the audio file format designated by <replaceable>EXT</replaceable>.</para>
 <para>For a list of valid formats supported, run Trackcutter with the
-<option>--help</option>. A table of supported formats will be shown at
+<option>--help</option> option. A table of supported formats will be shown at
 the bottom of the help message.</para>
 </listitem>
 </varlistentry>
