@@ -32,7 +32,9 @@
     Requires <a href="http://www.mega-nerd.com/libsndfile/">libsndfile</a> and
     and GNU libc (for getopt_long(), error() and program_invocation_short_name). */
 
-#define _GNU_SOURCE
+#ifdef HAVE_CONFIG_H
+#   include <config.h>
+#endif
 
 #include <features.h>
 #include <stdio.h>
@@ -48,9 +50,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <stdarg.h>
-
-/** Program version */
-#define VERSION "0.1.1"
 
 /** Definition for boolean constant @e false */
 #define FALSE 0
@@ -68,7 +67,7 @@
 #define DFL_MIN_SIGNAL_PERIOD 100
 /** Default minimum length for a track; silence will only be tested for
     after this period (in seconds). */
-#define DFL_MIN_TRACK_LENGTH 10
+#define DFL_MIN_TRACK_LENGTH 40
 /** Default signal-to-noise ratio used to discriminate non-silence from silence (in dBFS) */
 #define DFL_NOISE_FLOOR -48.0
 
@@ -88,7 +87,7 @@ typedef enum {
 
 /** Current mode with respect to cutting the audio recording */
 typedef enum {
-    CCTX_SILENCE,          /**< In a passage of prolongued silence between tracks */
+    CCTX_SILENCE,         /**< In a passage of prolongued silence between tracks */
     CCTX_TRACK,           /**< Currently in the middle of a track */
     CCTX_TRACK_STARTING,  /**< We suspect we may be commencing a new track */
     CCTX_TRACK_ENDING     /**< We suspect the current track may be ending */
@@ -1856,7 +1855,10 @@ static void force_end_of_track(void)
 {
     if(options.cut_point_action == CPA_LOG_POINT)
     {
-        print_track_cut();
+        if(state.cut_context == CCTX_TRACK || state.cut_context == CCTX_TRACK_ENDING)
+        {
+            print_track_cut();
+        }
     }
     else if(options.cut_point_action == CPA_EXTRACT_TRACK)
     {
