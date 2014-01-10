@@ -34,17 +34,18 @@ PROGRAM DOCUMENTATION (README file)
 
 [1] Brief introduction
 
-Trackcutter is a (presently command-line only) tool that automates the discovery
-and splicing of digitised analogue recordings containing multiple songs
-delimited by short periods of relative silence.
+Trackcutter is a (presently command-line only) tool that automates the splicing
+of digitised analogue audio recordings containing multiple songs delimited by
+short periods of relative silence.
 
 It uses heuristics to reliably detect these silent passages despite the presence
 of signal artifacts endemic of analogue audio equipment, such as background
 hiss, DC-offset and transient clicks and pops.
 
 The envisioned use for this program was to assist with digital capture of music
-from audio cassettes and vinyl record albums, so the individual songs can be
-indexed and played back on a [portable] digital music player.
+from compact cassette and vinyl record albums (and other analogue audio media
+that's not digitally indexed), so the individual songs can be isolated into
+separate files suitable for playback on a portable digital music player.
 
 You can simply capture each side of these media at a time into a large `.wav'
 file, reducing the manual intervention required as much as possible.

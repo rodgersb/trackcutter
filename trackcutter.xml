@@ -63,18 +63,21 @@
 <title>DESCRIPTION</title>
 
 <para>Trackcutter is a tool that automates the splicing of digitised analogue
-recordings containing multiple songs delimited by short periods of relative
-silence.</para>
+audio recordings containing multiple songs delimited by short periods of
+relative silence.</para>
 
 <para>It uses heuristics to reliably detect these silent passages despite the
-presence of noise artifacts endemic of analogue audio equipment, such as
+presence of signal artifacts endemic of analogue audio equipment, such as
 background hiss, DC-offset and transient clicks and pops.</para>
 
-<para>The envisioned use for Trackcutter is to assist with digital capture of
-music from compact cassettes and vinyl record albums, so the individual songs
-can be indexed and played back on a portable digital music player. (It also can
-be used to capture background music from video game consoles, especially if the
-game has a "jukebox" mode in its menu).</para>
+<para>The envisioned use for this program was to assist with digital capture of
+music from compact cassette and vinyl record albums (and other analogue audio
+media that's not digitally indexed), so the individual songs can be isolated
+into separate files suitable for playback on a portable digital music
+player.</para>
+
+<para>(It also can be used to capture background music from video game consoles,
+especially if the game has a "jukebox" mode in its menu).</para>
 
 <para>Trackcutter allows you to lazily capture each side of these media at a
 time into a single large audio file. It will then search that large file for
