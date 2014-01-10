@@ -77,9 +77,10 @@ Trackcutter requires:
     without much effort on the developer's part.
 
   * the GNU libc library, needed for the getopt_long() function for processing
-    long command-line options. Because there are a large number of command-line
-    options to handle different use cases, I decided having long options would
-    make using the program easier to learn.
+    long command-line options. Because there are a large number of
+    command-line options to handle different use cases, I decided having
+    long options would make using the program easier to learn. (This
+    dependency will be eliminated in a later version.)
 
 There are two ways to build the source code:
 
@@ -204,9 +205,9 @@ making mistakes (see section 4.5 and 6 for caveats).
     Type the following command at the terminal prompt, but only press [ENTER]
     immediately after you you press the [PLAY] button on your tape deck:
 
-        $ arecord --format=cd --file-type=wav --duration=10 silence.wav
+        $ arecord --format=cd --duration=10 silence.wav
 
-    The `--duration 10' option is the number of seconds to record for; adjust
+    The `--duration=10' option is the number of seconds to record for; adjust
     the number as needed. If you have multiple sound cards in your system, you
     may need to select the appropriate sound device with the `--device' option,
     see the arecord(1) man page for more information on that.
@@ -227,7 +228,7 @@ making mistakes (see section 4.5 and 6 for caveats).
 
     This will produce output similar to the following:
 
-        statistic               left_channel       right_channel
+       statistic                left_channel       right_channel
            positive_peak  +0.072729767000648  +0.002614032082205
            negative_peak  -0.002293943739325  -0.009167754394247
                peak_dbfs  -22.76575607491384  -40.75474060092774
@@ -266,7 +267,7 @@ making mistakes (see section 4.5 and 6 for caveats).
     Type the following command, but do not press [ENTER] until you've
     immediately hit [PLAY] on your cassette deck:
 
-        $ arecord --format=cd --file-type=wav --duration=$((45*60)) side_a.wav
+        $ arecord --format=cd --duration=$((45*60)) side_a.wav
 
     This captures side "A" of the cassette, and automatically stops after 45
     minutes (change the 45 to reflect the length of each side as needed; the
@@ -280,7 +281,7 @@ making mistakes (see section 4.5 and 6 for caveats).
 
     When done, flip the cassette around to side "B" and repeat the same command:
 
-        $ arecord --format=cd --file-type=wav --duration=$((45*60)) side_b.wav
+        $ arecord --format=cd --duration=$((45*60)) side_b.wav
 
 [4.4] Now the fun stuff!
 
@@ -414,7 +415,7 @@ making mistakes (see section 4.5 and 6 for caveats).
         album, which begins with a slowly-repeating submarine sonar "ping"
         sound, before the keyboards gradually fade-in.
 
-        The default is ten seconds.
+        The default is forty seconds.
 
         If you find Trackcutter is treating the intro as a separate track to the
         main part of the song, then try setting this value to greater than the
@@ -469,9 +470,9 @@ This means that all the heuristics featured are mathematically-defined
 best-guess attempts that should work for most recordings, but some tricky corner
 cases may cause it to produce incorrect results.
 
-You are advised to quickly listen/skim through the output files Trackcutter
-generates to make sure that the output is what you expect it to be, and be
-prepared to tweak options if Trackcutter makes a mistake.
+It's recommended that you quickly listen/skim through the output files
+Trackcutter generates to make sure that the output is what you expect it to be,
+and be prepared to tweak some options if Trackcutter makes a mistake.
 
 The *big* caveat is that Trackcutter cannot help you with an album where each
 song smoothly segues into the next (without any pause of silence). Trackcutter
@@ -483,12 +484,16 @@ Audacity to chop up the recording if you want to index the individual tracks.
 Well known examples of this type of album are Pink Floyd's 1973 album "Dark Side
 Of The Moon" and Jean-Michel Jarre's 1976 album "Oxygene".
 
-One other consideration is that while Trackcutter (through libsndfile) supports
-a few lossy audio formats (in addition to the myriad lossless formats) such as
-Ogg Vorbis, it's usually not recommended to use such a lossy format as
-input/output (unless you are severely limited in available disk space), because
-the repeated lossy re-encoding of the audio signal can cause increased
-deterioration in sound quality.
+If the source audio media suffers drop-outs (e.g. a compact cassette that has
+been partially damaged by close proximity to a magnet, or if sections of the
+tape have become warped or been re-spliced), then Trackcutter may also mistake
+these sections for intervening silence between songs.
+
+While Trackcutter (through libsndfile) supports a few lossy audio formats (in
+addition to the myriad lossless formats) such as Ogg Vorbis, it's usually not
+recommended to use such a lossy format as input/output (unless you are severely
+limited in available disk space), because the repeated lossy re-encoding of the
+audio signal can cause increased deterioration in sound quality.
 
 ------------------------------------------------------------------------
 
@@ -555,9 +560,13 @@ full license text is available in the file "COPYING", but in layman's terms:
   code, then the resulting aggregate work may only be distributed under
   the terms of the GPL.
 
+Trackcutter is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
 All work on Trackcutter done by Bryan Rodgers, unless otherwise stated.
 
-I can be contacted at <rodgersb at it dot net dot au>.
+I can be contacted via e-mail at <rodgersb at it dot net dot au>.
 
 Suggestions, feedback or code contributions are welcome.
 
