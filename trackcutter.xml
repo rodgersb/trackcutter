@@ -79,16 +79,17 @@ player.</para>
 <para>(It also can be used to capture background music from video game consoles,
 especially if the game has a "jukebox" mode in its menu).</para>
 
-<para>Trackcutter allows you to lazily capture each side of these media at a
+<para>Trackcutter allows you to lazily capture entire sides of these media at a
 time into a single large audio file. It will then search that large file for
 intervening silence between songs and divide that file into smaller clips that
-correspond to each song, so you can encode the individual song files into a
-lossy format to play on a portable digital music player.</para>
+correspond to each song, so you can batch-encode the individual song files into
+a lossy format and tag/name them.</para>
 
-<para>There's no need to search through the recording in an audio editor and
-determine the running times of each song. This reduces the manual intervention
-required as much as possible, in case you have a large music collection that you
-want digitised and need to minimise average time spent on each album.</para>
+<para>There's no need to manually scan through the recording in an audio editor
+and determine the running times of each song. This reduces the manual
+intervention required as much as possible, in case you have a large music
+collection that you want digitised and need to minimise average time spent on
+each album.</para>
 
 </refsect1>
 
