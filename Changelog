@@ -1,0 +1,19 @@
+Trackcutter version change history
+==================================
+
+Version 0.1.1 - 10/1/2014
+------------------------
+
+* Now hosted on github.com
+* Changed --snr option to --noise-floor, as it's a more appropriate name. SNR
+  ratios are never given as negative decibel quantities.
+* Added GNU autoconf configure script
+* Added README and man page
+* Added digital audio primer (audio_terminology.txt)
+* Fixed a bug where a spurious track was sometimes being generated in the report
+  when end of file was reached.
+
+Version 0.1.0 - October 2011
+----------------------------
+
+First release.
