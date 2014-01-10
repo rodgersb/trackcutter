@@ -11,10 +11,12 @@ EXEC=trackcutter
 
 # CC: Invocation name of C compiler
 # CFLAGS: Additional flags to pass to the C compiler
+# DEFS: `-Dname=xxxx' options to be passing to preprocessor
 # LDFLAGS: Additional flags to pass to the linker
 CC=gcc
+DEFS=-D_GNU_SOURCE -DVERSION="0.1.1"
 CFLAGS=-g -Wall $(shell pkg-config --cflags sndfile)
-LDFLAGS=$(shell pkg-config --libs sndfile) -lm
+LDFLAGS=-lm $(shell pkg-config --libs sndfile)
 
 # DB: Invocation name of debugger
 # DBFLAGS: Additional flags to pass to the debugger
@@ -38,7 +40,7 @@ build: $(EXEC)
 
 # Target for compiling source files into object module files
 $(OBJ): %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(DEFS) -c $<
 
 # Target for linking together the program executable
 $(EXEC): $(OBJ)
