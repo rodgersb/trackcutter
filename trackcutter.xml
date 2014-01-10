@@ -32,29 +32,29 @@
     <cmdsynopsis>
         <command>trackcutter</command>
         <arg choice="opt">--cut</arg>
-        <arg choice="opt">--cuts-file=<replaceable>cutsfile</replaceable></arg>
+        <arg choice="opt">--cuts-file=<replaceable>CUTSFILE</replaceable></arg>
         <group choice="opt">
-            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+            <arg choice="plain" rep="repeat"><replaceable>OPTION</replaceable></arg>
         </group>
-        <arg choice="plain"><replaceable>file</replaceable></arg>
+        <arg choice="plain"><replaceable>FILE</replaceable></arg>
     </cmdsynopsis>
 
     <cmdsynopsis>
         <command>trackcutter</command>
-        <arg choice="req">--extract-dir=<replaceable>dir</replaceable></arg>
+        <arg choice="req">--extract-dir=<replaceable>DIR</replaceable></arg>
         <group choice="opt">
-            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+            <arg choice="plain" rep="repeat"><replaceable>OPTION</replaceable></arg>
         </group>
-        <arg choice="plain"><replaceable>file</replaceable></arg>
+        <arg choice="plain"><replaceable>FILE</replaceable></arg>
     </cmdsynopsis>
 
     <cmdsynopsis>
         <command>trackcutter</command>
         <arg choice="req">--analyse</arg>
         <group choice="opt">
-            <arg choice="plain" rep="repeat"><replaceable>option</replaceable></arg>
+            <arg choice="plain" rep="repeat"><replaceable>OPTION</replaceable></arg>
         </group>
-        <arg choice="plain"><replaceable>file</replaceable></arg>
+        <arg choice="plain"><replaceable>FILE</replaceable></arg>
     </cmdsynopsis>
 
 </refsynopsisdiv>
