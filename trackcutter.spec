@@ -22,7 +22,7 @@ It uses heuristics to reliably detect these silent passages despite the presence
 of signal artifacts endemic of analogue audio equipment, such as background
 hiss, DC-offset and transient clicks and pops.
 
-The envisioned use for this program was to assist with digital capture of music
+The envisioned use for this program is to assist with digital capture of music
 from compact cassette and vinyl record albums (and other analogue audio media
 that's not digitally indexed), so the individual songs can be isolated into
 separate files suitable for playback on a portable digital music player.
