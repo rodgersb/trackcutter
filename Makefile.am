@@ -19,7 +19,8 @@ EXTRA_DIST = Doxyfile \
     Makefile.linux \
     README \
     TODO \
-    audio_terminology.txt
+    audio_terminology.txt \
+    trackcutter.spec
 
 # Man pages that will be installed system-wide during `make install'
 man_MANS = trackcutter.1
