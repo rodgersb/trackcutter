@@ -59,6 +59,10 @@ Additional filtering/analysis options
 * Allow a bit of silence padding at the end of each song (say, up to 2 seconds).
   This might be useful when burning an album to CD in disk-at-once (DAO) mode.
 
+* Filter out / skip over the XDR beeps on the lead-in of commercially-recorded
+  cassette tapes. A good analysis is done here:
+  http://www.lenrek.net/experiments/sdr-cassette/
+
 
 Ideas for an alternate GUI front-end
 ------------------------------------
@@ -83,3 +87,7 @@ Code maintenance issues
 * Could consider using LADSPA plugin architecture for all filters (high-pass,
   etc)? It'd make it possible to re-use code from existing LADSPA code, and any
   new filters written could be contributed to other LADSPA-based projects.
+
+* Investigate performance gains if separate signal processing routines could be
+  written for 8/16-bit integer samples (to avoid potentially costly conversion
+  to IEEE 754 double precision floating point).
