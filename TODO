@@ -1,0 +1,82 @@
+List of features / ideas slated for future Trackcutter releases
+===============================================================
+
+Improving song detection heuristics
+-----------------------------------
+
+Currently Trackcutter's song detection algorithm is a little simplistic; it
+merely uses a threshold noise floor and some assumptions about the minimum
+length of a song (and opening instrument sounds).
+
+Some ideas for improving this algorithm to eliminate further potentials for
+mistakes:
+
+* Optionally use a band-pass filter, so that silence is only tested in a certain
+  part of of the audio frequency spectrum. Could be handy if there's a constant
+  background tone imposed over the recording (e.g. 50/60Hz mains hum).
+
+* Use a Fourier transform library like FFTW to look at the overall profile of
+  the signal; most between-song silence in existing recordings would look like
+  white noise at a near-constant level for at least 1-2 seconds or more. This
+  could be combined with the RMS volume monitoring using a weighting function.
+
+  I hardly think much music out there would have a section of white noise at a
+  constant level for more than 1-2 seconds. Electronic drum machines might use
+  white noise for percussion, but these will always have a changing envelope.
+
+
+Improve command-line interface
+------------------------------
+
+* High pass filter should be enabled by default. I need to verify that it's not
+  degrading the perceived quality of the output, that the phase delay is not
+  interfering with stereo effects, etc.
+
+  Specifying a manual --dc-offset option could disable the high-pass filter.
+
+* Allow exempting a certain timecode window from silence detection. This could
+  allow the end-user to work around drop-outs or mid-song instrumental pauses.
+
+Additional filtering/analysis options
+-------------------------------------
+
+* Possibly include Dolby-B noise reduction filter, for cassettes that have been
+  recorded with it, but played back on a linear-only tape deck. The Dolby-B NR
+  patent has long expired now. I've found various discussion in audio enthusiast
+  forums on how Dolby-B works, but can't find any past software implementations.
+
+  The advantage of being able to do Dolby-B NR for cassettes that need it would
+  mean it'd lower the noise floor further, improving song change detection.
+
+* Possible Song loop/repeat detection. Use a rough match of the amplitude
+  envelope to detect if the song is looping again, then optionally do a slow
+  fade out at that point. The idea for this is to help with capturing a seamless
+  looping track, say, from a video game console.
+
+  It could even be used to help detect and remove vinyl record skips? Most
+  record skips would be at the period of the disc RPM.
+
+
+Ideas for an alternate GUI front-end
+------------------------------------
+
+* Need to select a portable GUI toolkit (FLTK? WxWidgets?)
+* Only implement as minimal functionality needed to get the typical use cases
+  done; don't re-implement Audacity.
+* Allow a zoomable amplitude view and possibly a frequency spectrum view.
+* Provide a wizard for establishing noise floor.
+* Live VU meters when capturing, to help user get the recording levels right.
+* Would need to use ALSA on Linux, and OSS (Open Sound System) for other UNIXes.
+  (Not sure how to go about sound for Mac OSX/Windows?)
+
+
+Code maintenance issues
+-----------------------
+
+* Codebase needs refactoring. In OSS projects, when scratching that itch becomes
+  a big drive towards getting results, sometimes consideration of future code
+  maintenance can end up taking a back seat.
+
+* Could consider using LADSPA plugin architecture for all filters (high-pass,
+  etc)? It'd make it possible to re-use code from existing LADSPA code, and any
+  new filters written could be contributed to other LADSPA-based projects.
