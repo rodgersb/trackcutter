@@ -97,3 +97,7 @@ Code maintenance issues
 * Investigate performance gains if separate signal processing routines could be
   written for 8/16-bit integer samples (to avoid potentially costly conversion
   to IEEE 754 double precision floating point).
+
+* Eliminate the requirement for GNU libc (currently needed because of use of
+  getopt_long() and error(), and possibly some other behaviours. GNU libiberty
+  is designed to address this problem.
