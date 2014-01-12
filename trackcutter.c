@@ -1328,9 +1328,9 @@ static void print_cuts_header(void)
 {
     if(!options.no_cuts_file_header && state.cuts_file)
     {
-        char *start_s;
-        char *end_s;
-        char *duration_s;
+        char *start_s = NULL;
+        char *end_s = NULL;
+        char *duration_s = NULL;
 
         switch(options.cut_point_format)
         {   
