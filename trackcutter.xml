@@ -948,7 +948,7 @@ my computer sound card's line-in port, and the sound card's mixer is configured
 to capture from line-in.</para>
 
 <para><emphasis>Note:</emphasis> If you're capturing audio from a vinyl record
-or some other analogue audio equipment, simply substitute the directions
+player or some other analogue audio equipment, simply substitute the directions
 involving the tape player with the equivalent for that device; e.g. "press
 <keycap>PLAY</keycap> on tape deck" could also mean "lower needle on vinyl
 record".</para>
