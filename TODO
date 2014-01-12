@@ -37,6 +37,7 @@ Improve command-line interface
 * Allow exempting a certain timecode window from silence detection. This could
   allow the end-user to work around drop-outs or mid-song instrumental pauses.
 
+
 Additional filtering/analysis options
 -------------------------------------
 
@@ -62,6 +63,11 @@ Additional filtering/analysis options
 * Filter out / skip over the XDR beeps on the lead-in of commercially-recorded
   cassette tapes. A good analysis is done here:
   http://www.lenrek.net/experiments/sdr-cassette/
+
+* Probably overkill, but in the long run, could investigate if it's possible to
+  cut lossy input files on a frame boundary (losslessly) so that quality is not
+  degraded further? The print-cuts mode at the moment already makes it possible
+  for another specialised program to do this, if the user sets up a script.
 
 
 Ideas for an alternate GUI front-end
