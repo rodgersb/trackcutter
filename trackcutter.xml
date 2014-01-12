@@ -974,21 +974,15 @@ button on your tape deck:</para>
 </screen>
 
 <para>The <option>--duration=<literal>10</literal></option> option is the number
-of seconds to record for; adjust the number as needed. If you have multiple
-sound cards in your system you may need to select the appropriate sound device
-with the <option>--device</option> option; see the
+of seconds to record for; adjust the number as needed.</para>
+
+<para>If you have multiple sound cards in your system you may need to select the
+appropriate sound device with the <option>--device</option> option; see the
 <citerefentry><refentrytitle>arecord</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 man page for more information on that.</para>
 
-<para>Stop the tape deck once the terminal prompt reappears, and reposition the
-tape to the start of side-A.</para>
+<para>Stop the tape deck once the terminal prompt reappears.</para>
 
-<para><emphasis>Note:</emphasis> Some commercial pre-recorded cassette tapes may
-have a series of short increasing-pitch beeps on the lead-in before the first
-song (this is a cue signal often used at duplication plants for marking the
-start/end of the master recording). You'll need to advance the cassette past
-this point so Trackcutter doesn't accidentally include it as part of the first
-song.</para>
 
 <para>Now let's use Trackcutter to analyse the noise levels of the silence test
 recording. Type the following command:</para>
@@ -1036,6 +1030,15 @@ decisions.</para>
 <refsect2>
 <title>Start capturing</title>
 
+<para>Reposition the tape to the start of side-A.</para>
+
+<para><emphasis>Note:</emphasis> Some commercial pre-recorded cassette tapes may
+have a series of short increasing-pitch beeps on the lead-in before the first
+song (this is a cue signal often used at duplication plants for marking the
+start/end of the master recording). You'll need to advance the cassette past
+this point so Trackcutter doesn't accidentally include it as part of the first
+song.</para>
+
 <para>Type the following command, but do not press <keycap>ENTER</keycap> until
 you've immediately hit <keycap>PLAY</keycap> on your cassette deck:</para>
 
@@ -1044,13 +1047,13 @@ you've immediately hit <keycap>PLAY</keycap> on your cassette deck:</para>
 </screen>
 
 <para>This captures side-A of the cassette, and automatically stops after 45
-minutes (change the 45 to reflect the length of each side as needed; the
-<option>--duration</option> option takes a number of seconds, hence the shell
-arithmetic expression to multiply minutes by sixty).</para>
+minutes (change the `<literal>45</literal>' to reflect the length of each side
+as needed; the <option>--duration</option> option takes a number of seconds,
+hence the shell arithmetic expression to multiply minutes by sixty).</para>
 
-<para>If you don't know the durations of each side, then you can omit the
-<option>--duration</option> option completely, but you'll need to press
-<keycombo action="simul"><keycap>Ctrl</keycap><keycap>C</keycap></keycombo> when
+<para>If you don't know the durations of each side of the tape, then you can
+omit the <option>--duration</option> option completely, but you'll need to press
+<keycombo action="simul"><keycap>Ctrl</keycap> <keycap>C</keycap></keycombo> when
 the tape deck reaches the end-of-side to prevent ALSA's
 <command>arecord</command> from happily filling up the rest of the disk.</para>
 
