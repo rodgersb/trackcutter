@@ -56,6 +56,9 @@ Additional filtering/analysis options
   It could even be used to help detect and remove vinyl record skips? Most
   record skips would be at the period of the disc RPM.
 
+* Allow a bit of silence padding at the end of each song (say, up to 2 seconds).
+  This might be useful when burning an album to CD in disk-at-once (DAO) mode.
+
 
 Ideas for an alternate GUI front-end
 ------------------------------------
