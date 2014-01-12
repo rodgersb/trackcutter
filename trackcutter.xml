@@ -76,8 +76,6 @@ media that's not digitally indexed), so the individual songs can be isolated
 into separate files suitable for playback on a portable digital music
 player.</para>
 
-<para>(It also can be used to capture background music from video game consoles,
-especially if the game has a "jukebox" mode in its menu).</para>
 
 <para>Trackcutter allows you to lazily capture entire sides of these media at a
 time into a single large audio file. It will then search that large file for
@@ -90,6 +88,10 @@ and determine the running times of each song. This reduces the manual
 intervention required as much as possible, in case you have a large music
 collection that you want digitised and need to minimise average time spent on
 each album.</para>
+
+<para>Another potential use for Trackcutter is to help with capturing analogue
+recordings of background music from video game consoles, especially if the game
+has a "jukebox" mode in its menu.</para>
 
 </refsect1>
 
@@ -940,9 +942,10 @@ case.</para>
 documentation on how to digitally capture an audio signal to a disk file, and
 substitute those commands as appropriate.</para>
 
-<para>Let's say I have a compact audio cassette that I want to digitise, which has
-two sides of 45mins each. I have a tape deck with its line-out hooked up to
-my computer sound card's line-in port.</para>
+<para>Let's say I have a compact audio cassette that I want to digitise, which
+has two sides of 45mins each. I have a tape deck with its line-out hooked up to
+my computer sound card's line-in port, and the sound card's mixer is configured
+to capture from line-in.</para>
 
 <para><emphasis>Note:</emphasis> If you're capturing audio from a vinyl record
 or some other analogue audio equipment, simply substitute the directions
