@@ -157,9 +157,9 @@ on how to digitally capture an audio signal to a disk file, and substitute those
 commands as appropriate.
 
 I also recommend installing a media player program like MPlayer
-<http://mplayerhq.hu/>, which can play back many audio files, so you can confirm
-that the capture was done properly, and for troubleshooting if Trackcutter is
-making mistakes (see section 4.5 and 6 for caveats).
+<http://mplayerhq.hu/>, which can play back many audio file formats, so you can
+confirm that the capture was done properly, and for troubleshooting if
+Trackcutter is making mistakes (see section 4.5 and 6 for caveats).
 
 [4.1] Configure ALSA for recording
 
